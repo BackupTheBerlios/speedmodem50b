@@ -31,7 +31,10 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/time.h>
+
+#ifdef HAVE_LIBPNG
 #include <png.h>
+#endif
 
 
 #define REMOTE_SERVER_PORT 0xaaaa
@@ -211,6 +214,7 @@ int main(int argc, char *argv[]) {
   unsigned int data_HEC_FAST_UP;
   unsigned int data_HEC_INTER_UP;
 
+#ifdef HAVE_LIBPNG
   // libPNG-stuff
   int x, y, bits;
 
@@ -224,18 +228,20 @@ int main(int argc, char *argv[]) {
   png_bytep * rows;
   png_byte* row;
   png_byte* pixel;
-
-#define png_col_R 0
-#define png_col_G 1
-#define png_col_B 2
-#define png_col_A 3
+#endif
 
   if(argc!=2 && argc!=3) {
-    printf("usage : %s <server> [-(h|s|b|p)]\n", argv[0]);
+    printf("usage : %s <server> [-(h|s|b", argv[0]);
+#ifdef HAVE_LIBPNG
+    printf("|p");
+#endif
+    printf(")]\n");
     printf("with  : -h human readable (default)\n");
     printf("        -s script readable\n");
     printf("        -b binary\n");
+#ifdef HAVE_LIBPNG
     printf("        -p PNG image of tones\n");
+#endif
     exit(1);
   }
 
@@ -325,7 +331,13 @@ int main(int argc, char *argv[]) {
           for(i=0; i<n; ++i) printf("%c", msg[i]); // RAW
           break;
 
+#ifdef HAVE_LIBPNG
        case 'p':
+#define png_col_R 0
+#define png_col_G 1
+#define png_col_B 2
+#define png_col_A 3
+
 #define pilotTone 96
 #define firstDownstream 64
 
@@ -440,6 +452,7 @@ int main(int argc, char *argv[]) {
 		free(rows[y]);
 	  free(rows);
           break;
+#endif
 
        case 'h':
           printf("Firmware Information:\n");
