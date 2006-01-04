@@ -387,14 +387,14 @@ int main(int argc, char *argv[]) {
               }
 
               if(x>=diag_margin && x<width-diag_margin) {
-                tone=(x-diag_margin-1)*512/diag_width;
+                tone=(x-diag_margin)*512/diag_width;
                 if(y==height-diag_margin) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
                 if( (y>=height-diag_margin+1) &&
                     (y<=height-diag_margin+mark_tone_len) &&
                     !(tone%32)) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
 
                 if(y>=diag_margin && y<height-diag_margin) {
-                  bits=tone%2?data_TONE[tone/2]%16:data_TONE[tone/2]/16;
+                  bits=(tone+1)%2?data_TONE[(tone+1)/2]%16:data_TONE[(tone+1)/2]/16;
 
                   if(height-y-diag_margin>bits*(diag_height/8)) {
                    // diag - hintergrund
