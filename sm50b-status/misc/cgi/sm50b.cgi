@@ -1,11 +1,32 @@
 #!/bin/sh
-MINRELOAD=5
+MINRELOAD=60
 MAXRELOAD=900
-MINCORRECTION=5
+MINCORRECTION=60
 MAXCORRECTION=60
-CORRECTIONRELOAD=5
+CORRECTIONRELOAD=60
+HOSTNAME=sm50b
+UPDATE_LOOPS=5
 
 PNGREQUEST=png
+PIDFILE="${SCRIPT_FILENAME}.pid"
+DATAFILE="${SCRIPT_FILENAME}.dat"
+BINARY="/mybin/sm50b-status/sm50b"
+
+UPDATE_PID=$( cat "${PIDFILE}" 2>/dev/null ); [ "${UPDATE_PID}" ] || UPDATE_PID="none"
+if ! kill -0 ${UPDATE_PID} 2>/dev/null; then
+   ${BINARY} ${HOSTNAME} -b > "${DATAFILE}"
+   {
+      I=${UPDATE_LOOPS}
+      while [ $I -gt 0 ]; do
+        sleep ${MINRELOAD}
+        ${BINARY} ${HOSTNAME} -b > "${DATAFILE}"
+        I=$[ $I - 1 ];
+      done
+   } 2>/dev/null >/dev/null </dev/null 2</dev/null &
+   UPDATE_PID=$!
+   disown 2>/dev/null
+   echo "${UPDATE_PID}" > "${PIDFILE}"
+fi
 
 if [ "${QUERY_STRING}" != "${PNGREQUEST}" ]; then
 
@@ -22,7 +43,7 @@ Content-Type: text/html
     <title>Connection status of SpeedModem 50B on :  $(date)</title>
   </head>
   <body>
-    <pre>$( [ "$TIMEOUT" -ge "${MINRELOAD}" ] && /mybin/sm50b-status/sm50b sm50b | grep -v 'MAC Address' | grep -v '(interleaved)' | grep -A99 'ADSL Status :' | sed 's/(fast)/      /' | head -n 7 )</pre><br>
+    <pre>$( [ "$TIMEOUT" -ge "${MINRELOAD}" ] && cat "${DATAFILE}" | ${BINARY} - | grep -v 'MAC Address' | grep -v '(interleaved)' | grep -A99 'ADSL Status :' | sed 's/(fast)/      /' | head -n 7 )</pre><br>
     <center><img border=0 src="${SCRIPT_NAME}?${PNGREQUEST}"></center>
   </body>
 </html>
@@ -30,6 +51,6 @@ EOT
 
 else
 echo -en 'Content-Type: image/png\n\n'
-/mybin/sm50b-status/sm50b sm50b -p
+cat "${DATAFILE}" | ${BINARY} - -p
 fi
 
