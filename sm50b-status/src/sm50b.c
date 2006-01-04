@@ -346,7 +346,7 @@ int main(int argc, char *argv[]) {
 #define png_col_A 3
 
 #define pilotTone 96
-#define firstDownstream 64
+#define firstDownstream 60
 
 #define diag_height 96
 #define diag_width 1024
