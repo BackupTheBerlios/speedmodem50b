@@ -402,7 +402,7 @@ int main(int argc, char *argv[]) {
 
               if((x>(diag_margin-mark_bit_longlen)) && (x<diag_margin) && y>=diag_margin && y<=height-diag_margin && !((height-y-diag_margin)%(diag_height/16))) {
                 if(x>(diag_margin-mark_bit_len)) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
-                if(!((height-y-diag_margin)%(diag_height/8))) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
+                if(!((height-y-diag_margin)%(diag_height/16))) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
               }
 
               if(x>=diag_margin && x<width-diag_margin) {
@@ -415,10 +415,10 @@ int main(int argc, char *argv[]) {
                 if(y>=diag_margin && y<height-diag_margin) {
                   bits=(tone)%2?data_TONE[(tone)/2]/16:data_TONE[(tone)/2]%16;
 
-                  if(height-y-diag_margin>bits*(diag_height/8)) {
+                  if(height-y-diag_margin>bits*(diag_height/16)) {
                    // diag - hintergrund
                    if(tone==pilotTone) { pixel[png_col_R]=pilotR; pixel[png_col_G]=pilotG; pixel[png_col_B]=pilotB; pixel[png_col_A]=pilotA; } else
-                   if(! ((height-y-diag_margin)%(diag_height/8)) )
+                   if(! ((height-y-diag_margin)%(diag_height/16)) )
                       { pixel[png_col_R]=bitR; pixel[png_col_G]=bitG; pixel[png_col_B]=bitB; pixel[png_col_A]=bitA; } else
                    { pixel[png_col_R]=diagR; pixel[png_col_G]=diagG; pixel[png_col_B]=diagB; pixel[png_col_A]=diagA; }
                   } else {
