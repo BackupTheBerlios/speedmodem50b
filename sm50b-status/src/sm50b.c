@@ -231,7 +231,7 @@ int main(int argc, char *argv[]) {
 #endif
 
   if(argc!=2 && argc!=3) {
-    printf("usage : %s <server> [-(h|s|b", argv[0]);
+    printf("usage : %s (<server>|-) [-(h|s|b", argv[0]);
 #ifdef HAVE_LIBPNG
     printf("|p");
 #endif
@@ -242,34 +242,40 @@ int main(int argc, char *argv[]) {
 #ifdef HAVE_LIBPNG
     printf("        -p PNG image of tones\n");
 #endif
+    printf("        <server> CELL-19A-BX-hostname or\n");
+    printf("        -        for stdin\n");
     exit(1);
   }
+  if(strlen(argv[1])==1 && argv[1][0]=='-') {
+    // stdin-mode
+    memset(msg,0x0,MAX_MSG);
+    if(fread(msg, 1, MAX_MSG, stdin)<756) { printf("%s: cannot read valid data from stdin\n", argv[0]); exit(1); }
+  } else {
+    h = gethostbyname(argv[1]);
+    if(h==NULL) { printf("%s: unknown host '%s' \n", argv[0], argv[1]); exit(1); }
 
-  h = gethostbyname(argv[1]);
-  if(h==NULL) { printf("%s: unknown host '%s' \n", argv[0], argv[1]); exit(1); }
+    remoteServAddr.sin_family = h->h_addrtype;
+    memcpy((char *) &remoteServAddr.sin_addr.s_addr, h->h_addr_list[0], h->h_length);
+    remoteServAddr.sin_port = htons(REMOTE_SERVER_PORT);
 
-  remoteServAddr.sin_family = h->h_addrtype;
-  memcpy((char *) &remoteServAddr.sin_addr.s_addr, h->h_addr_list[0], h->h_length);
-  remoteServAddr.sin_port = htons(REMOTE_SERVER_PORT);
-
-  sd = socket(AF_INET,SOCK_DGRAM,0);
-  if(sd<0) { printf("%s: cannot open socket \n",argv[0]); exit(1); }
+    sd = socket(AF_INET,SOCK_DGRAM,0);
+    if(sd<0) { printf("%s: cannot open socket \n",argv[0]); exit(1); }
   
-  cliAddr.sin_family = AF_INET; cliAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  cliAddr.sin_port = htons(0);
+    cliAddr.sin_family = AF_INET; cliAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    cliAddr.sin_port = htons(0);
 
-  rc = bind(sd, (struct sockaddr *) &cliAddr, sizeof(cliAddr));
-  if(rc<0) { printf("%s: cannot bind port\n", argv[0]); exit(1); }
+    rc = bind(sd, (struct sockaddr *) &cliAddr, sizeof(cliAddr));
+    if(rc<0) { printf("%s: cannot bind port\n", argv[0]); exit(1); }
 
-  flags = 0;
+    flags = 0;
 
-  timeOut = 100; // ms
-  retries = 5; // times
+    timeOut = 100; // ms
+    retries = 5; // times
 
-  buffer[0]=0; buffer[1]=1;
-  rc = sendto(sd, buffer, 2, flags, (struct sockaddr *)(&remoteServAddr), sizeof(remoteServAddr));
+    buffer[0]=0; buffer[1]=1;
+    rc = sendto(sd, buffer, 2, flags, (struct sockaddr *)(&remoteServAddr), sizeof(remoteServAddr));
 
-  if(rc<0) { printf("%s: cannot send data %d \n",argv[0],i-1); close(sd); exit(1); }
+    if(rc<0) { printf("%s: cannot send data %d \n",argv[0],i-1); close(sd); exit(1); }
 
     memset(msg,0x0,MAX_MSG);
 
@@ -279,6 +285,7 @@ int main(int argc, char *argv[]) {
     echoLen = sizeof(echoServAddr);
     n = recvfrom(sd, msg, MAX_MSG, flags, (struct sockaddr*)(&echoServAddr), &echoLen);
     if(n<0) { printf("%s: cannot receive data \n",argv[0]); close(sd); exit(1); }
+  }
 
     byteSwap(data_BANDWIDTH_FAST_DOWN_buf, &data_BANDWIDTH_FAST_DOWN); byteSwap(data_BANDWIDTH_INTER_DOWN_buf, &data_BANDWIDTH_INTER_DOWN);
     byteSwap(data_BANDWIDTH_FAST_UP_buf, &data_BANDWIDTH_FAST_UP); byteSwap(data_BANDWIDTH_INTER_UP_buf, &data_BANDWIDTH_INTER_UP);
