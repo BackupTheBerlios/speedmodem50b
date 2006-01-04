@@ -16,9 +16,10 @@ UPDATE_PID=$( cat "${PIDFILE}" 2>/dev/null ); [ "${UPDATE_PID}" ] || UPDATE_PID=
 if ! kill -0 ${UPDATE_PID} 2>/dev/null; then
    ${BINARY} ${HOSTNAME} -b > "${DATAFILE}"
    {
+      DELAY=$[ ${MINRELOAD} - 1 ]
       I=${UPDATE_LOOPS}
       while [ $I -gt 0 ]; do
-        sleep ${MINRELOAD}
+        sleep ${DELAY}
         ${BINARY} ${HOSTNAME} -b > "${DATAFILE}"
         I=$[ $I - 1 ];
       done
