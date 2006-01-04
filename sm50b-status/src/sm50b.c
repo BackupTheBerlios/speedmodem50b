@@ -402,7 +402,7 @@ int main(int argc, char *argv[]) {
 
               if((x>(diag_margin-mark_bit_longlen)) && (x<diag_margin) && y>=diag_margin && y<=height-diag_margin && !((height-y-diag_margin)%(diag_height/16))) {
                 if(x>(diag_margin-mark_bit_len)) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
-                if(!((height-y-diag_margin)%(diag_height/16))) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
+                if(!((height-y-diag_margin)%(diag_height/8))) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
               }
 
               if(x>=diag_margin && x<width-diag_margin) {
