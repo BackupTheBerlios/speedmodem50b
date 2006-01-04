@@ -31,6 +31,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/time.h>
+#include <png.h>
+
 
 #define REMOTE_SERVER_PORT 0xaaaa
 #define MAX_MSG 1492
@@ -60,6 +62,8 @@
 #define ADR_CRC_INTER_UP 0x166
 #define ADR_HEC_FAST_UP 0x168
 #define ADR_HEC_INTER_UP 0x16a
+#define ADR_TONE0 0x17c
+#define ADR_TONE_END 0x27c
 #define ADR_HOSTNAME 0x288
 #define ADR_IP 0x2a8
 #define ADR_MASK 0x2c8
@@ -98,6 +102,7 @@
 #define TXT_CRC_INTER_UP "LINE_ERR_CRC_UP_INTERLEAVED"
 #define TXT_HEC_FAST_UP "LINE_ERR_HEC_UP_FASTPATH"
 #define TXT_HEC_INTER_UP "LINE_ERR_HEC_UP_INTERLEAVED"
+#define TXT_TONE "TONES"
 #define TXT_HOSTNAME "HOSTNAME"
 #define TXT_IP "LAN_IP"
 #define TXT_MASK "LAN_NETMASK"
@@ -155,7 +160,7 @@ void printLineStatus(int status) {
 int main(int argc, char *argv[]) {
   
   unsigned short int s;
-  int sd, rc, i, n, echoLen, flags, error, timeOut, retries;
+  int sd, rc, i, n, echoLen, flags, error, timeOut, retries, tone;
   struct sockaddr_in cliAddr, remoteServAddr, echoServAddr;
   struct hostent *h;
   char msg[MAX_MSG];
@@ -166,6 +171,7 @@ int main(int argc, char *argv[]) {
   char* data_COUNTRY=&msg[ADR_COUNTRY];
   char* data_MAC=&msg[ADR_MAC];
   char* data_UPTIME=&msg[ADR_UPTIME];
+  unsigned char* data_TONE=&msg[ADR_TONE0];
   char* data_HOSTNAME=&msg[ADR_HOSTNAME];
   char* data_IP=&msg[ADR_IP];
   char* data_MASK=&msg[ADR_MASK];
@@ -205,11 +211,31 @@ int main(int argc, char *argv[]) {
   unsigned int data_HEC_FAST_UP;
   unsigned int data_HEC_INTER_UP;
 
+  // libPNG-stuff
+  int x, y, bits;
+
+  int width, height;
+  png_byte color_type;
+  png_byte bit_depth;
+
+  png_structp png_ptr;
+  png_infop info_ptr;
+  int number_of_passes;
+  png_bytep * rows;
+  png_byte* row;
+  png_byte* pixel;
+
+#define png_col_R 0
+#define png_col_G 1
+#define png_col_B 2
+#define png_col_A 3
+
   if(argc!=2 && argc!=3) {
-    printf("usage : %s <server> [-(h|s|b)]\n", argv[0]);
+    printf("usage : %s <server> [-(h|s|b|p)]\n", argv[0]);
     printf("with  : -h human readable (default)\n");
     printf("        -s script readable\n");
     printf("        -b binary\n");
+    printf("        -p PNG image of tones\n");
     exit(1);
   }
 
@@ -285,6 +311,11 @@ int main(int argc, char *argv[]) {
           printf("%s=%u\n", TXT_CRC_INTER_UP, data_CRC_INTER_UP);
           printf("%s=%u\n", TXT_HEC_FAST_UP, data_HEC_FAST_UP);
           printf("%s=%u\n", TXT_HEC_INTER_UP, data_HEC_INTER_UP);
+          printf("%s=%u,%u", TXT_TONE, data_TONE[0]/16, data_TONE[0]%16);
+             for(tone=1; tone<(ADR_TONE_END-ADR_TONE0); ++tone) {
+                printf(",%u,%u", data_TONE[tone]/16, data_TONE[tone]%16 );
+             }
+          printf("\n");
           printf("%s=%s\n", TXT_HOSTNAME, data_HOSTNAME);
           printf("%s=%s\n", TXT_IP, data_IP);
           printf("%s=%s\n", TXT_MASK, data_MASK);
@@ -292,6 +323,122 @@ int main(int argc, char *argv[]) {
 
        case 'b':
           for(i=0; i<n; ++i) printf("%c", msg[i]); // RAW
+          break;
+
+       case 'p':
+#define pilotTone 96
+#define firstDownstream 64
+
+#define diag_height 96
+#define diag_width 1024
+#define diag_margin 20
+#define mark_tone_len 4
+#define mark_bit_len 4
+#define mark_bit_longlen 6
+
+#define bgR 233
+#define bgG 241
+#define bgB 254
+#define bgA 255
+#define diagR 138
+#define diagG 179
+#define diagB 189
+#define diagA 255
+#define bitR 128
+#define bitG 128
+#define bitB 128
+#define bitA 255
+#define markR 0
+#define markG 0
+#define markB 0
+#define markA 255
+#define upstreamR 0
+#define upstreamG 255 
+#define upstreamB 0
+#define upstreamA 255
+#define downstreamR 0
+#define downstreamG 0
+#define downstreamB 255
+#define downstreamA 255
+#define pilotR 255
+#define pilotG 0
+#define pilotB 0
+#define pilotA 255
+
+          height=diag_height+(2*diag_margin);
+          width=diag_width+(2*diag_margin);
+          
+          bit_depth=8;
+          rows=malloc(height*sizeof(png_bytep));
+          for (y=0; y<height; y++)
+		rows[y]=malloc(width*bit_depth*4);
+
+          for (x=0; x<width; x++) {
+            for (y=0; y<height; y++) {
+              row = rows[y]; pixel=&(row[x*4]);
+
+              pixel[png_col_R]=bgR; pixel[png_col_G]=bgG; pixel[png_col_B]=bgB; pixel[png_col_A]=bgA;
+
+              if(x+1==diag_margin && (y>=diag_margin && y<=height-diag_margin) ) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
+
+              if((x>(diag_margin-mark_bit_longlen)) && (x<diag_margin) && y>=diag_margin && y<=height-diag_margin && !((height-y-diag_margin)%(diag_height/16))) {
+                if(x>(diag_margin-mark_bit_len)) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
+                if(!((height-y-diag_margin)%(diag_height/8))) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
+              }
+
+              if(x>=diag_margin && x<width-diag_margin) {
+                tone=(x-diag_margin)*512/diag_width;
+                if(y==height-diag_margin) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
+                if( (y>=height-diag_margin+1) &&
+                    (y<=height-diag_margin+mark_tone_len) &&
+                    !(tone%32)) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
+
+                if(y>=diag_margin && y<height-diag_margin) {
+                  bits=tone%2?data_TONE[tone/2]%16:data_TONE[tone/2]/16;
+
+                  if(height-y-diag_margin>bits*(diag_height/8)) {
+                   // diag - hintergrund
+                   if(tone==pilotTone) { pixel[png_col_R]=pilotR; pixel[png_col_G]=pilotG; pixel[png_col_B]=pilotB; pixel[png_col_A]=pilotA; } else
+                   if(! ((height-y-diag_margin)%(diag_height/8)) )
+                      { pixel[png_col_R]=bitR; pixel[png_col_G]=bitG; pixel[png_col_B]=bitB; pixel[png_col_A]=bitA; } else
+                   { pixel[png_col_R]=diagR; pixel[png_col_G]=diagG; pixel[png_col_B]=diagB; pixel[png_col_A]=diagA; }
+                  } else {
+                    // balken
+                    if(tone>=firstDownstream) {
+                      pixel[png_col_R]=downstreamR; pixel[png_col_G]=downstreamG; pixel[png_col_B]=downstreamB; pixel[png_col_A]=downstreamA;
+                    } else {
+                      pixel[png_col_R]=upstreamR; pixel[png_col_G]=upstreamG; pixel[png_col_B]=upstreamB; pixel[png_col_A]=upstreamA;
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          /* initialize stuff */
+	  if(!(png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL))) { printf("error 1\n"); return 1; }
+	  if(!(info_ptr = png_create_info_struct(png_ptr))) { printf("error 2"); return 1; }
+          if(setjmp(png_jmpbuf(png_ptr))) { printf("error 3"); return 1; }
+          png_init_io(png_ptr, stdout);
+
+          /* write header */
+          if(setjmp(png_jmpbuf(png_ptr))) { printf("error 4"); return 1; }
+          png_set_IHDR(png_ptr, info_ptr, width, height,
+		     bit_depth, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
+		     PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+	  png_write_info(png_ptr, info_ptr);
+
+          /* write bytes */
+          if(setjmp(png_jmpbuf(png_ptr))) { printf("error 5"); return 1; }
+          png_write_image(png_ptr, rows);
+
+          /* end write */
+          if(setjmp(png_jmpbuf(png_ptr))) { printf("error 6"); return 1; }
+          png_write_end(png_ptr, NULL);
+
+          for (y=0; y<height; y++)
+		free(rows[y]);
+	  free(rows);
           break;
 
        case 'h':
@@ -316,6 +463,11 @@ int main(int argc, char *argv[]) {
           printf("CRC error (interleaved) : %10u %10u\n", data_CRC_INTER_DOWN, data_CRC_INTER_UP);
           printf("HEC error (fast)        : %10u %10u\n", data_HEC_FAST_DOWN, data_HEC_FAST_UP);
           printf("HEC error (interleaved) : %10u %10u\n", data_HEC_INTER_DOWN, data_HEC_INTER_UP);
+
+          for(tone=0; tone<(ADR_TONE_END-ADR_TONE0); ++tone) {
+             if(!(tone%16)) printf("\ntone %3u-%3u:", (2*tone), (2*tone)+31);
+             printf(" %02x", data_TONE[tone]);
+          }; printf("\n");
           break;
 
        default:
