@@ -41,7 +41,7 @@ Content-Type: text/html
 <html>
   <head>
     <meta http-equiv="refresh" content="${TIMEOUT}; URL=${SCRIPT_NAME}?${QUERY_STRING}">
-    <title>Connection status of SpeedModem 50B on :  $(date)</title>
+    <title>Connection status of SpeedModem 50B on :  $(date -r "${DATAFILE}")</title>
   </head>
   <body>
     <pre>$( [ "$TIMEOUT" -ge "${MINRELOAD}" ] && ${BINARY} - < "${DATAFILE}" | grep -v 'MAC Address' | grep -v '(interleaved)' | grep -A99 'ADSL Status :' | sed 's/(fast)/      /' | head -n 7 )</pre><br>
