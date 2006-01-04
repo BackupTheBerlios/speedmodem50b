@@ -418,7 +418,7 @@ int main(int argc, char *argv[]) {
                   if(height-y-diag_margin>bits*(diag_height/16)) {
                    // diag - hintergrund
                    if(tone==pilotTone) { pixel[png_col_R]=pilotR; pixel[png_col_G]=pilotG; pixel[png_col_B]=pilotB; pixel[png_col_A]=pilotA; } else
-                   if(! ((height-y-diag_margin)%(diag_height/16)) )
+                   if(! ((height-y-diag_margin)%(diag_height/8)) )
                       { pixel[png_col_R]=bitR; pixel[png_col_G]=bitG; pixel[png_col_B]=bitB; pixel[png_col_A]=bitA; } else
                    { pixel[png_col_R]=diagR; pixel[png_col_G]=diagG; pixel[png_col_B]=diagB; pixel[png_col_A]=diagA; }
                   } else {
