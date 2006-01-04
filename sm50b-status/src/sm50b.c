@@ -387,7 +387,7 @@ int main(int argc, char *argv[]) {
               }
 
               if(x>=diag_margin && x<width-diag_margin) {
-                tone=(x-diag_margin)*512/diag_width;
+                tone=(x-diag_margin+1)*512/diag_width;
                 if(y==height-diag_margin) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
                 if( (y>=height-diag_margin+1) &&
                     (y<=height-diag_margin+mark_tone_len) &&
