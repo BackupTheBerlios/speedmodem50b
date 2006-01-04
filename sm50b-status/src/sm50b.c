@@ -317,9 +317,9 @@ int main(int argc, char *argv[]) {
           printf("%s=%u\n", TXT_CRC_INTER_UP, data_CRC_INTER_UP);
           printf("%s=%u\n", TXT_HEC_FAST_UP, data_HEC_FAST_UP);
           printf("%s=%u\n", TXT_HEC_INTER_UP, data_HEC_INTER_UP);
-          printf("%s=%u,%u", TXT_TONE, data_TONE[0]/16, data_TONE[0]%16);
+          printf("%s=%u,%u", TXT_TONE, data_TONE[0]%16, data_TONE[0]/16);
              for(tone=1; tone<(ADR_TONE_END-ADR_TONE0); ++tone) {
-                printf(",%u,%u", data_TONE[tone]/16, data_TONE[tone]%16 );
+                printf(",%u,%u", data_TONE[tone]%16, data_TONE[tone]/16 );
              }
           printf("\n");
           printf("%s=%s\n", TXT_HOSTNAME, data_HOSTNAME);
@@ -406,7 +406,7 @@ int main(int argc, char *argv[]) {
                     !(tone%32)) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
 
                 if(y>=diag_margin && y<height-diag_margin) {
-                  bits=(tone+1)%2?data_TONE[(tone+1)/2]%16:data_TONE[(tone+1)/2]/16;
+                  bits=(tone)%2?data_TONE[(tone)/2]/16:data_TONE[(tone)/2]%16;
 
                   if(height-y-diag_margin>bits*(diag_height/8)) {
                    // diag - hintergrund
