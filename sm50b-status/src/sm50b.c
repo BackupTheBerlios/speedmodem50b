@@ -216,7 +216,7 @@ int main(int argc, char *argv[]) {
 
 #ifdef HAVE_LIBPNG
   // libPNG-stuff
-  int x, y, bits;
+  int x, y, bits, bits_prev, bits_next;
 
   int width, height;
   png_byte color_type;
@@ -379,10 +379,14 @@ int main(int argc, char *argv[]) {
 #define downstreamG 0
 #define downstreamB 255
 #define downstreamA 255
-#define pilotR 255
-#define pilotG 0
-#define pilotB 0
+#define pilotR 200
+#define pilotG 10
+#define pilotB 10
 #define pilotA 255
+#define zeroR 200
+#define zeroG 200
+#define zeroB 10
+#define zeroA 255
 
           height=diag_height+(2*diag_margin);
           width=diag_width+(2*diag_margin);
@@ -418,6 +422,13 @@ int main(int argc, char *argv[]) {
                   if(height-y-diag_margin>bits*(diag_height/16)) {
                    // diag - hintergrund
                    if(tone==pilotTone) { pixel[png_col_R]=pilotR; pixel[png_col_G]=pilotG; pixel[png_col_B]=pilotB; pixel[png_col_A]=pilotA; } else
+                   if(bits==0) {
+                      bits_next=(tone+1)<512?((tone+1)%2?data_TONE[(tone+1)/2]/16:data_TONE[(tone+1)/2]%16):0;
+                      bits_prev=(tone-1)>=0?((tone-1)%2?data_TONE[(tone-1)/2]/16:data_TONE[(tone-1)/2]%16):0;
+                      if(((bits_prev==0) && (bits_next!=0)) || ((bits_prev!=0) && (bits_next==0))) {
+                        pixel[png_col_R]=zeroR; pixel[png_col_G]=zeroG; pixel[png_col_B]=zeroB; pixel[png_col_A]=zeroA;
+                      }
+                   }
                    if(! ((height-y-diag_margin)%(diag_height/8)) )
                       { pixel[png_col_R]=bitR; pixel[png_col_G]=bitG; pixel[png_col_B]=bitB; pixel[png_col_A]=bitA; } else
                    { pixel[png_col_R]=diagR; pixel[png_col_G]=diagG; pixel[png_col_B]=diagB; pixel[png_col_A]=diagA; }
