@@ -83,6 +83,10 @@
 #define ADR_IP 0x2a8
 #define ADR_MASK 0x2c8
 
+#define ADR_VC_QOS 0x2e8
+#define ADR_VC_VPI 0x2ea
+#define ADR_VC_VCI 0x2ec
+
 #define VAL_LINESTATUS_DOWN 0x00
 #define VAL_LINESTATUS_WFI  0x08
 #define VAL_LINESTATUS_INIT 0x10
@@ -131,6 +135,10 @@
 #define TXT_HOSTNAME "HOSTNAME"
 #define TXT_IP "LAN_IP"
 #define TXT_MASK "LAN_NETMASK"
+
+#define TXT_VC_QOS "VC_QOS"
+#define TXT_VC_VPI "VC_VPI"
+#define TXT_VC_VCI "VC_VCI"
 
 int isReadable(int sd,int * error,int timeOut) {
   fd_set socketReadSet;
@@ -182,13 +190,20 @@ void printLineStatus(int status) {
    }
 }
 
+char msg[MAX_MSG];
+
+void displayAt(unsigned int adr) {
+   unsigned int data;
+   char* buf = &msg[adr];
+   byteSwap(buf, &data);
+   printf("0x%04x : %5u\n", adr, data);
+}
+
 int main(int argc, char *argv[]) {
-  
   unsigned short int s;
   int sd, rc, i, n, echoLen, flags, error, timeOut, retries, tone;
   struct sockaddr_in cliAddr, remoteServAddr, echoServAddr;
   struct hostent *h;
-  char msg[MAX_MSG];
   char* data_BB=&msg[ADR_BB];
   char* data_RAS=&msg[ADR_RAS];
   char* data_DSL=&msg[ADR_DSL];
@@ -226,6 +241,9 @@ int main(int argc, char *argv[]) {
   char* data_LINE_NOISE_UP_buf=&msg[ADR_LINE_NOISE_UP];
   char* data_LINE_XMITPWR_DOWN_buf=&msg[ADR_LINE_XMITPWR_DOWN];
   char* data_LINE_ATT_UP_buf=&msg[ADR_LINE_ATT_UP];
+  char* data_VC_QOS_buf=&msg[ADR_VC_QOS];
+  char* data_VC_VPI_buf=&msg[ADR_VC_VPI];
+  char* data_VC_VCI_buf=&msg[ADR_VC_VCI];
 
   unsigned int data_LINESTATUS;
   unsigned int data_BANDWIDTH_FAST_DOWN;
@@ -258,6 +276,9 @@ int main(int argc, char *argv[]) {
   double frac_LINE_NOISE_UP;
   double frac_LINE_XMITPWR_DOWN;
   double frac_LINE_ATT_UP;
+  unsigned int data_VC_QOS;
+  unsigned int data_VC_VPI;
+  unsigned int data_VC_VCI;
 
 #ifdef HAVE_LIBPNG
   // libPNG-stuff
@@ -344,6 +365,8 @@ int main(int argc, char *argv[]) {
     byteSwap(data_LINE_XMITPWR_UP_buf, &data_LINE_XMITPWR_UP); byteSwap(data_LINE_ATT_DOWN_buf, &data_LINE_ATT_DOWN);
     byteSwap(data_LINE_RELLOAD_UP_buf, &data_LINE_RELLOAD_UP); byteSwap(data_LINE_NOISE_UP_buf, &data_LINE_NOISE_UP);
     byteSwap(data_LINE_XMITPWR_DOWN_buf, &data_LINE_XMITPWR_DOWN); byteSwap(data_LINE_ATT_UP_buf, &data_LINE_ATT_UP);
+    byteSwap(data_VC_QOS_buf, &data_VC_QOS); byteSwap(data_VC_VPI_buf, &data_VC_VPI); byteSwap(data_VC_VCI_buf, &data_VC_VCI);
+
     frac_LINE_NOISE_DOWN=0.1f*((double)data_LINE_NOISE_DOWN);
     frac_LINE_XMITPWR_UP=0.1f*((double)data_LINE_XMITPWR_UP);
     frac_LINE_ATT_DOWN=0.1f*((double)data_LINE_ATT_DOWN);
@@ -397,6 +420,9 @@ int main(int argc, char *argv[]) {
           printf("%s=%s\n", TXT_HOSTNAME, data_HOSTNAME);
           printf("%s=%s\n", TXT_IP, data_IP);
           printf("%s=%s\n", TXT_MASK, data_MASK);
+          printf("%s=%u\n", TXT_VC_QOS, data_VC_QOS);
+          printf("%s=%u\n", TXT_VC_VPI, data_VC_VPI);
+          printf("%s=%u\n", TXT_VC_VCI, data_VC_VCI);
           break;
 
        case 'b':
@@ -553,6 +579,7 @@ int main(int argc, char *argv[]) {
           printf("ADSL Status:\n");
           printf("ADSL Status : "); printLineStatus(data_LINESTATUS); printf("\n");
           printf("ADSL Uptime : %s\n", data_UPTIME);
+          printf("ATM vc      : vpi=%u vci=%u qos=%u\n", data_VC_VPI, data_VC_VCI, data_VC_QOS);
           printf("                                down         up\n");
           printf("Bit-rate  (fast)          : %10u %10u\n", data_BANDWIDTH_FAST_DOWN, data_BANDWIDTH_FAST_UP);
           printf("Bit-rate  (interleaved)   : %10u %10u\n", data_BANDWIDTH_INTER_DOWN, data_BANDWIDTH_INTER_UP);
@@ -571,6 +598,13 @@ int main(int argc, char *argv[]) {
              if(!(tone%16)) printf("\ntone %3u-%3u:", (2*tone), (2*tone)+31);
              printf(" %02x",  (16*(data_TONE[tone]%16))+(data_TONE[tone]/16));
           }; printf("\n");
+          break;
+
+       case 'd':
+          displayAt(0x145);
+          displayAt(0x150);
+          displayAt(0x152);
+          displayAt(0x2ee);
           break;
 
        default:
