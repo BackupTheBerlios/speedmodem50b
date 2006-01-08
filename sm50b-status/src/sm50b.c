@@ -74,8 +74,8 @@
 #define ADR_LINE_RELLOAD_UP 0x174     // in %
 #define ADR_LINE_NOISE_UP 0x176       // in 1/10*dBm
 #define ADR_LINE_ATT_UP 0x17a         // in 1/10*dBm
-#define ADR_LINE_XMITPWRUP_DOWN 0x170 // in 1/10*dBm
-#define ADR_LINE_XMITPWRDOWN_UP 0x178 // in 1/10*dBm
+#define ADR_LINE_XMITPWR_UP 0x170 // in 1/10*dBm
+#define ADR_LINE_XMITPWR_DOWN 0x178 // in 1/10*dBm
 
 #define ADR_TONE0 0x17c
 #define ADR_TONE_END 0x27c
@@ -120,11 +120,11 @@
 
 #define TXT_LINE_RELLOAD_DOWN "LINE_RELLOAD_DOWN"
 #define TXT_LINE_NOISE_DOWN "LINE_NOISE_DOWN"
-#define TXT_LINE_XMITPWRUP_DOWN "LINE_XMITPWRUP_DOWN"
+#define TXT_LINE_XMITPWR_UP "LINE_XMITPWR_UP"
 #define TXT_LINE_ATT_DOWN "LINE_ATT_DOWN"
 #define TXT_LINE_RELLOAD_UP "LINE_RELLOAD_UP"
 #define TXT_LINE_NOISE_UP "LINE_NOISE_UP"
-#define TXT_LINE_XMITPWRDOWN_UP "LINE_XMITPWRDOWN_UP"
+#define TXT_LINE_XMITPWR_DOWN "LINE_XMITPWR_DOWN"
 #define TXT_LINE_ATT_UP "LINE_ATT_UP"
 
 #define TXT_TONE "TONES"
@@ -220,11 +220,11 @@ int main(int argc, char *argv[]) {
 
   char* data_LINE_RELLOAD_DOWN_buf=&msg[ADR_LINE_RELLOAD_DOWN];
   char* data_LINE_NOISE_DOWN_buf=&msg[ADR_LINE_NOISE_DOWN];
-  char* data_LINE_XMITPWRUP_DOWN_buf=&msg[ADR_LINE_XMITPWRUP_DOWN];
+  char* data_LINE_XMITPWR_UP_buf=&msg[ADR_LINE_XMITPWR_UP];
   char* data_LINE_ATT_DOWN_buf=&msg[ADR_LINE_ATT_DOWN];
   char* data_LINE_RELLOAD_UP_buf=&msg[ADR_LINE_RELLOAD_UP];
   char* data_LINE_NOISE_UP_buf=&msg[ADR_LINE_NOISE_UP];
-  char* data_LINE_XMITPWRDOWN_UP_buf=&msg[ADR_LINE_XMITPWRDOWN_UP];
+  char* data_LINE_XMITPWR_DOWN_buf=&msg[ADR_LINE_XMITPWR_DOWN];
   char* data_LINE_ATT_UP_buf=&msg[ADR_LINE_ATT_UP];
 
   unsigned int data_LINESTATUS;
@@ -246,17 +246,17 @@ int main(int argc, char *argv[]) {
   unsigned int data_HEC_INTER_UP;
   unsigned int data_LINE_RELLOAD_DOWN;
   unsigned int data_LINE_NOISE_DOWN;
-  unsigned int data_LINE_XMITPWRUP_DOWN;
+  unsigned int data_LINE_XMITPWR_UP;
   unsigned int data_LINE_ATT_DOWN;
   unsigned int data_LINE_RELLOAD_UP;
   unsigned int data_LINE_NOISE_UP;
-  unsigned int data_LINE_XMITPWRDOWN_UP;
+  unsigned int data_LINE_XMITPWR_DOWN;
   unsigned int data_LINE_ATT_UP;
   double frac_LINE_NOISE_DOWN;
-  double frac_LINE_XMITPWRUP_DOWN;
+  double frac_LINE_XMITPWR_UP;
   double frac_LINE_ATT_DOWN;
   double frac_LINE_NOISE_UP;
-  double frac_LINE_XMITPWRDOWN_UP;
+  double frac_LINE_XMITPWR_DOWN;
   double frac_LINE_ATT_UP;
 
 #ifdef HAVE_LIBPNG
@@ -341,14 +341,14 @@ int main(int argc, char *argv[]) {
     byteSwap(data_CRC_FAST_UP_buf, &data_CRC_FAST_UP); byteSwap(data_CRC_INTER_UP_buf, &data_CRC_INTER_UP);
     byteSwap(data_HEC_FAST_UP_buf, &data_HEC_FAST_UP); byteSwap(data_HEC_INTER_UP_buf, &data_HEC_INTER_UP);
     byteSwap(data_LINE_RELLOAD_DOWN_buf, &data_LINE_RELLOAD_DOWN); byteSwap(data_LINE_NOISE_DOWN_buf, &data_LINE_NOISE_DOWN);
-    byteSwap(data_LINE_XMITPWRUP_DOWN_buf, &data_LINE_XMITPWRUP_DOWN); byteSwap(data_LINE_ATT_DOWN_buf, &data_LINE_ATT_DOWN);
+    byteSwap(data_LINE_XMITPWR_UP_buf, &data_LINE_XMITPWR_UP); byteSwap(data_LINE_ATT_DOWN_buf, &data_LINE_ATT_DOWN);
     byteSwap(data_LINE_RELLOAD_UP_buf, &data_LINE_RELLOAD_UP); byteSwap(data_LINE_NOISE_UP_buf, &data_LINE_NOISE_UP);
-    byteSwap(data_LINE_XMITPWRDOWN_UP_buf, &data_LINE_XMITPWRDOWN_UP); byteSwap(data_LINE_ATT_UP_buf, &data_LINE_ATT_UP);
+    byteSwap(data_LINE_XMITPWR_DOWN_buf, &data_LINE_XMITPWR_DOWN); byteSwap(data_LINE_ATT_UP_buf, &data_LINE_ATT_UP);
     frac_LINE_NOISE_DOWN=0.1f*((double)data_LINE_NOISE_DOWN);
-    frac_LINE_XMITPWRUP_DOWN=0.1f*((double)data_LINE_XMITPWRUP_DOWN);
+    frac_LINE_XMITPWR_UP=0.1f*((double)data_LINE_XMITPWR_UP);
     frac_LINE_ATT_DOWN=0.1f*((double)data_LINE_ATT_DOWN);
     frac_LINE_NOISE_UP=0.1f*((double)data_LINE_NOISE_UP);
-    frac_LINE_XMITPWRDOWN_UP=0.1f*((double)data_LINE_XMITPWRDOWN_UP);
+    frac_LINE_XMITPWR_DOWN=0.1f*((double)data_LINE_XMITPWR_DOWN);
     frac_LINE_ATT_UP=0.1f*((double)data_LINE_ATT_UP);
 
     data_LINESTATUS=msg[ADR_LINESTATUS];
@@ -382,11 +382,11 @@ int main(int argc, char *argv[]) {
           printf("%s=%u\n", TXT_HEC_INTER_UP, data_HEC_INTER_UP);
           printf("%s=%u\n", TXT_LINE_RELLOAD_DOWN, data_LINE_RELLOAD_DOWN);
           printf("%s=%.1f\n", TXT_LINE_NOISE_DOWN, frac_LINE_NOISE_DOWN);
-          printf("%s=%.1f\n", TXT_LINE_XMITPWRUP_DOWN, frac_LINE_XMITPWRUP_DOWN);
+          printf("%s=%.1f\n", TXT_LINE_XMITPWR_UP, frac_LINE_XMITPWR_UP);
           printf("%s=%.1f\n", TXT_LINE_ATT_DOWN, frac_LINE_ATT_DOWN);
           printf("%s=%u\n", TXT_LINE_RELLOAD_UP, data_LINE_RELLOAD_UP);
           printf("%s=%.1f\n", TXT_LINE_NOISE_UP, frac_LINE_NOISE_UP);
-          printf("%s=%.1f\n", TXT_LINE_XMITPWRDOWN_UP, frac_LINE_XMITPWRDOWN_UP);
+          printf("%s=%.1f\n", TXT_LINE_XMITPWR_DOWN, frac_LINE_XMITPWR_DOWN);
           printf("%s=%.1f\n", TXT_LINE_ATT_UP, frac_LINE_ATT_UP);
 
           printf("%s=%u,%u", TXT_TONE, data_TONE[0]/16, data_TONE[0]%16);
@@ -565,7 +565,7 @@ int main(int argc, char *argv[]) {
           printf("HEC error (interleaved)   : %10u %10u\n", data_HEC_INTER_DOWN, data_HEC_INTER_UP);
           printf("Noise margin              : %6.1f dBm %6.1f dBm\n", frac_LINE_NOISE_DOWN, frac_LINE_NOISE_UP);
           printf("Attenuation               : %6.1f dBm %6.1f dBm\n", frac_LINE_ATT_DOWN, frac_LINE_ATT_UP);
-          printf("Transmit power            : %6.1f dBm %6.1f dBm\n", frac_LINE_XMITPWRDOWN_UP, frac_LINE_XMITPWRUP_DOWN);
+          printf("Transmit power            : %6.1f dBm %6.1f dBm\n", frac_LINE_XMITPWR_DOWN, frac_LINE_XMITPWR_UP);
 
           for(tone=0; tone<(ADR_TONE_END-ADR_TONE0); ++tone) {
              if(!(tone%16)) printf("\ntone %3u-%3u:", (2*tone), (2*tone)+31);
