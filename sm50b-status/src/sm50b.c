@@ -49,6 +49,8 @@
 #define ADR_MAC 0x108
 #define ADR_UPTIME 0x11c
 #define ADR_LINESTATUS 0x144
+
+// DOWN = near end  UP = far end
 #define ADR_BANDWIDTH_FAST_DOWN 0x14a
 #define ADR_BANDWIDTH_INTER_DOWN 0x148
 #define ADR_BANDWIDTH_FAST_UP 0x14e
@@ -65,6 +67,16 @@
 #define ADR_CRC_INTER_UP 0x166
 #define ADR_HEC_FAST_UP 0x168
 #define ADR_HEC_INTER_UP 0x16a
+
+#define ADR_LINE_RELLOAD_DOWN 0x16c   // in %
+#define ADR_LINE_NOISE_DOWN 0x16e     // in 1/10*dBm
+#define ADR_LINE_ATT_DOWN 0x172       // in 1/10*dBm
+#define ADR_LINE_RELLOAD_UP 0x174     // in %
+#define ADR_LINE_NOISE_UP 0x176       // in 1/10*dBm
+#define ADR_LINE_ATT_UP 0x17a         // in 1/10*dBm
+#define ADR_LINE_XMITPWRUP_DOWN 0x170 // in 1/10*dBm
+#define ADR_LINE_XMITPWRDOWN_UP 0x178 // in 1/10*dBm
+
 #define ADR_TONE0 0x17c
 #define ADR_TONE_END 0x27c
 #define ADR_HOSTNAME 0x288
@@ -105,6 +117,16 @@
 #define TXT_CRC_INTER_UP "LINE_ERR_CRC_UP_INTERLEAVED"
 #define TXT_HEC_FAST_UP "LINE_ERR_HEC_UP_FASTPATH"
 #define TXT_HEC_INTER_UP "LINE_ERR_HEC_UP_INTERLEAVED"
+
+#define TXT_LINE_RELLOAD_DOWN "LINE_RELLOAD_DOWN"
+#define TXT_LINE_NOISE_DOWN "LINE_NOISE_DOWN"
+#define TXT_LINE_XMITPWRUP_DOWN "LINE_XMITPWRUP_DOWN"
+#define TXT_LINE_ATT_DOWN "LINE_ATT_DOWN"
+#define TXT_LINE_RELLOAD_UP "LINE_RELLOAD_UP"
+#define TXT_LINE_NOISE_UP "LINE_NOISE_UP"
+#define TXT_LINE_XMITPWRDOWN_UP "LINE_XMITPWRDOWN_UP"
+#define TXT_LINE_ATT_UP "LINE_ATT_UP"
+
 #define TXT_TONE "TONES"
 #define TXT_HOSTNAME "HOSTNAME"
 #define TXT_IP "LAN_IP"
@@ -196,6 +218,15 @@ int main(int argc, char *argv[]) {
   char* data_HEC_FAST_UP_buf=&msg[ADR_HEC_FAST_UP];
   char* data_HEC_INTER_UP_buf=&msg[ADR_HEC_INTER_UP];
 
+  char* data_LINE_RELLOAD_DOWN_buf=&msg[ADR_LINE_RELLOAD_DOWN];
+  char* data_LINE_NOISE_DOWN_buf=&msg[ADR_LINE_NOISE_DOWN];
+  char* data_LINE_XMITPWRUP_DOWN_buf=&msg[ADR_LINE_XMITPWRUP_DOWN];
+  char* data_LINE_ATT_DOWN_buf=&msg[ADR_LINE_ATT_DOWN];
+  char* data_LINE_RELLOAD_UP_buf=&msg[ADR_LINE_RELLOAD_UP];
+  char* data_LINE_NOISE_UP_buf=&msg[ADR_LINE_NOISE_UP];
+  char* data_LINE_XMITPWRDOWN_UP_buf=&msg[ADR_LINE_XMITPWRDOWN_UP];
+  char* data_LINE_ATT_UP_buf=&msg[ADR_LINE_ATT_UP];
+
   unsigned int data_LINESTATUS;
   unsigned int data_BANDWIDTH_FAST_DOWN;
   unsigned int data_BANDWIDTH_INTER_DOWN;
@@ -213,6 +244,20 @@ int main(int argc, char *argv[]) {
   unsigned int data_CRC_INTER_UP;
   unsigned int data_HEC_FAST_UP;
   unsigned int data_HEC_INTER_UP;
+  unsigned int data_LINE_RELLOAD_DOWN;
+  unsigned int data_LINE_NOISE_DOWN;
+  unsigned int data_LINE_XMITPWRUP_DOWN;
+  unsigned int data_LINE_ATT_DOWN;
+  unsigned int data_LINE_RELLOAD_UP;
+  unsigned int data_LINE_NOISE_UP;
+  unsigned int data_LINE_XMITPWRDOWN_UP;
+  unsigned int data_LINE_ATT_UP;
+  double frac_LINE_NOISE_DOWN;
+  double frac_LINE_XMITPWRUP_DOWN;
+  double frac_LINE_ATT_DOWN;
+  double frac_LINE_NOISE_UP;
+  double frac_LINE_XMITPWRDOWN_UP;
+  double frac_LINE_ATT_UP;
 
 #ifdef HAVE_LIBPNG
   // libPNG-stuff
@@ -295,6 +340,17 @@ int main(int argc, char *argv[]) {
     byteSwap(data_FEC_FAST_UP_buf, &data_FEC_FAST_UP); byteSwap(data_FEC_INTER_UP_buf, &data_FEC_INTER_UP);
     byteSwap(data_CRC_FAST_UP_buf, &data_CRC_FAST_UP); byteSwap(data_CRC_INTER_UP_buf, &data_CRC_INTER_UP);
     byteSwap(data_HEC_FAST_UP_buf, &data_HEC_FAST_UP); byteSwap(data_HEC_INTER_UP_buf, &data_HEC_INTER_UP);
+    byteSwap(data_LINE_RELLOAD_DOWN_buf, &data_LINE_RELLOAD_DOWN); byteSwap(data_LINE_NOISE_DOWN_buf, &data_LINE_NOISE_DOWN);
+    byteSwap(data_LINE_XMITPWRUP_DOWN_buf, &data_LINE_XMITPWRUP_DOWN); byteSwap(data_LINE_ATT_DOWN_buf, &data_LINE_ATT_DOWN);
+    byteSwap(data_LINE_RELLOAD_UP_buf, &data_LINE_RELLOAD_UP); byteSwap(data_LINE_NOISE_UP_buf, &data_LINE_NOISE_UP);
+    byteSwap(data_LINE_XMITPWRDOWN_UP_buf, &data_LINE_XMITPWRDOWN_UP); byteSwap(data_LINE_ATT_UP_buf, &data_LINE_ATT_UP);
+    frac_LINE_NOISE_DOWN=0.1f*((double)data_LINE_NOISE_DOWN);
+    frac_LINE_XMITPWRUP_DOWN=0.1f*((double)data_LINE_XMITPWRUP_DOWN);
+    frac_LINE_ATT_DOWN=0.1f*((double)data_LINE_ATT_DOWN);
+    frac_LINE_NOISE_UP=0.1f*((double)data_LINE_NOISE_UP);
+    frac_LINE_XMITPWRDOWN_UP=0.1f*((double)data_LINE_XMITPWRDOWN_UP);
+    frac_LINE_ATT_UP=0.1f*((double)data_LINE_ATT_UP);
+
     data_LINESTATUS=msg[ADR_LINESTATUS];
 
     buffer[0]=(argc>2&&strlen(argv[2])==2)?argv[2][1]:'h';
@@ -324,6 +380,15 @@ int main(int argc, char *argv[]) {
           printf("%s=%u\n", TXT_CRC_INTER_UP, data_CRC_INTER_UP);
           printf("%s=%u\n", TXT_HEC_FAST_UP, data_HEC_FAST_UP);
           printf("%s=%u\n", TXT_HEC_INTER_UP, data_HEC_INTER_UP);
+          printf("%s=%u\n", TXT_LINE_RELLOAD_DOWN, data_LINE_RELLOAD_DOWN);
+          printf("%s=%.1f\n", TXT_LINE_NOISE_DOWN, frac_LINE_NOISE_DOWN);
+          printf("%s=%.1f\n", TXT_LINE_XMITPWRUP_DOWN, frac_LINE_XMITPWRUP_DOWN);
+          printf("%s=%.1f\n", TXT_LINE_ATT_DOWN, frac_LINE_ATT_DOWN);
+          printf("%s=%u\n", TXT_LINE_RELLOAD_UP, data_LINE_RELLOAD_UP);
+          printf("%s=%.1f\n", TXT_LINE_NOISE_UP, frac_LINE_NOISE_UP);
+          printf("%s=%.1f\n", TXT_LINE_XMITPWRDOWN_UP, frac_LINE_XMITPWRDOWN_UP);
+          printf("%s=%.1f\n", TXT_LINE_ATT_UP, frac_LINE_ATT_UP);
+
           printf("%s=%u,%u", TXT_TONE, data_TONE[0]/16, data_TONE[0]%16);
              for(tone=1; tone<(ADR_TONE_END-ADR_TONE0); ++tone) {
                 printf(",%u,%u", data_TONE[tone]/16, data_TONE[tone]%16 );
@@ -489,26 +554,23 @@ int main(int argc, char *argv[]) {
           printf("ADSL Status : "); printLineStatus(data_LINESTATUS); printf("\n");
           printf("ADSL Uptime : %s\n", data_UPTIME);
           printf("                                down         up\n");
-          printf("Bit-rate  (fast)        : %10u %10u\n", data_BANDWIDTH_FAST_DOWN, data_BANDWIDTH_FAST_UP);
-          printf("Bit-rate  (interleaved) : %10u %10u\n", data_BANDWIDTH_INTER_DOWN, data_BANDWIDTH_INTER_UP);
-          printf("FEC error (fast)        : %10u %10u\n", data_FEC_FAST_DOWN, data_FEC_FAST_UP);
-          printf("FEC error (interleaved) : %10u %10u\n", data_FEC_INTER_DOWN, data_FEC_INTER_UP);
-          printf("CRC error (fast)        : %10u %10u\n", data_CRC_FAST_DOWN, data_CRC_FAST_UP);
-          printf("CRC error (interleaved) : %10u %10u\n", data_CRC_INTER_DOWN, data_CRC_INTER_UP);
-          printf("HEC error (fast)        : %10u %10u\n", data_HEC_FAST_DOWN, data_HEC_FAST_UP);
-          printf("HEC error (interleaved) : %10u %10u\n", data_HEC_INTER_DOWN, data_HEC_INTER_UP);
+          printf("Bit-rate  (fast)          : %10u %10u\n", data_BANDWIDTH_FAST_DOWN, data_BANDWIDTH_FAST_UP);
+          printf("Bit-rate  (interleaved)   : %10u %10u\n", data_BANDWIDTH_INTER_DOWN, data_BANDWIDTH_INTER_UP);
+          printf("Bit-rate  (relative cap.) : %8u %% %8u %%\n", data_LINE_RELLOAD_DOWN, data_LINE_RELLOAD_UP);
+          printf("FEC error (fast)          : %10u %10u\n", data_FEC_FAST_DOWN, data_FEC_FAST_UP);
+          printf("FEC error (interleaved)   : %10u %10u\n", data_FEC_INTER_DOWN, data_FEC_INTER_UP);
+          printf("CRC error (fast)          : %10u %10u\n", data_CRC_FAST_DOWN, data_CRC_FAST_UP);
+          printf("CRC error (interleaved)   : %10u %10u\n", data_CRC_INTER_DOWN, data_CRC_INTER_UP);
+          printf("HEC error (fast)          : %10u %10u\n", data_HEC_FAST_DOWN, data_HEC_FAST_UP);
+          printf("HEC error (interleaved)   : %10u %10u\n", data_HEC_INTER_DOWN, data_HEC_INTER_UP);
+          printf("Noise margin              : %6.1f dBm %6.1f dBm\n", frac_LINE_NOISE_DOWN, frac_LINE_NOISE_UP);
+          printf("Attenuation               : %6.1f dBm %6.1f dBm\n", frac_LINE_ATT_DOWN, frac_LINE_ATT_UP);
+          printf("Transmit power            : %6.1f dBm %6.1f dBm\n", frac_LINE_XMITPWRDOWN_UP, frac_LINE_XMITPWRUP_DOWN);
 
           for(tone=0; tone<(ADR_TONE_END-ADR_TONE0); ++tone) {
              if(!(tone%16)) printf("\ntone %3u-%3u:", (2*tone), (2*tone)+31);
              printf(" %02x",  (16*(data_TONE[tone]%16))+(data_TONE[tone]/16));
           }; printf("\n");
-
-          printf("\n");
-          for(tone=0x16c; tone<0x17a; tone+=2) {
-             data_HEC_INTER_UP_buf=&msg[tone];
-             byteSwap(data_HEC_INTER_UP_buf, &data_HEC_INTER_UP);
-             printf("Unknown %04x = %5u (=%04x)\n", tone, data_HEC_INTER_UP, data_HEC_INTER_UP);
-          }
           break;
 
        default:
