@@ -324,9 +324,9 @@ int main(int argc, char *argv[]) {
           printf("%s=%u\n", TXT_CRC_INTER_UP, data_CRC_INTER_UP);
           printf("%s=%u\n", TXT_HEC_FAST_UP, data_HEC_FAST_UP);
           printf("%s=%u\n", TXT_HEC_INTER_UP, data_HEC_INTER_UP);
-          printf("%s=%u,%u", TXT_TONE, data_TONE[0]%16, data_TONE[0]/16);
+          printf("%s=%u,%u", TXT_TONE, data_TONE[0]/16, data_TONE[0]%16);
              for(tone=1; tone<(ADR_TONE_END-ADR_TONE0); ++tone) {
-                printf(",%u,%u", data_TONE[tone]%16, data_TONE[tone]/16 );
+                printf(",%u,%u", data_TONE[tone]/16, data_TONE[tone]%16 );
              }
           printf("\n");
           printf("%s=%s\n", TXT_HOSTNAME, data_HOSTNAME);
@@ -500,7 +500,7 @@ int main(int argc, char *argv[]) {
 
           for(tone=0; tone<(ADR_TONE_END-ADR_TONE0); ++tone) {
              if(!(tone%16)) printf("\ntone %3u-%3u:", (2*tone), (2*tone)+31);
-             printf(" %02x", data_TONE[tone]);
+             printf(" %02x",  (16*(data_TONE[tone]%16))+(data_TONE[tone]/16));
           }; printf("\n");
           break;
 
