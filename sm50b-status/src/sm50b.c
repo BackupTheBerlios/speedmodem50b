@@ -502,6 +502,13 @@ int main(int argc, char *argv[]) {
              if(!(tone%16)) printf("\ntone %3u-%3u:", (2*tone), (2*tone)+31);
              printf(" %02x",  (16*(data_TONE[tone]%16))+(data_TONE[tone]/16));
           }; printf("\n");
+
+          printf("\n");
+          for(tone=0x16c; tone<0x17a; tone+=2) {
+             data_HEC_INTER_UP_buf=&msg[tone];
+             byteSwap(data_HEC_INTER_UP_buf, &data_HEC_INTER_UP);
+             printf("Unknown %04x = %5u (=%04x)\n", tone, data_HEC_INTER_UP, data_HEC_INTER_UP);
+          }
           break;
 
        default:
