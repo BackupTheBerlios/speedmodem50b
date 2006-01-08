@@ -1,4 +1,5 @@
 #!/bin/sh
+BINARY="/mybin/sm50b-status/sm50b"
 MINRELOAD=60
 MAXRELOAD=900
 MINCORRECTION=60
@@ -8,9 +9,9 @@ HOSTNAME=sm50b
 UPDATE_LOOPS=5
 
 PNGREQUEST=png
-PIDFILE="${SCRIPT_FILENAME}.pid"
-DATAFILE="${SCRIPT_FILENAME}.dat"
-BINARY="/mybin/sm50b-status/sm50b"
+SCRIPTBASE="$( echo ${SCRIPT_FILENAME} | cut -d '.' -f 1)"
+PIDFILE="${SCRIPTBASE}.pid"
+DATAFILE="${SCRIPTBASE}.dat"
 
 UPDATE_PID=$( cat "${PIDFILE}" 2>/dev/null ); [ "${UPDATE_PID}" ] || UPDATE_PID="none"
 if ! kill -0 ${UPDATE_PID} 2>/dev/null; then
