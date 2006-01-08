@@ -44,7 +44,7 @@ Content-Type: text/html
     <title>Connection status of SpeedModem 50B on :  $(date -r "${DATAFILE}")</title>
   </head>
   <body>
-    <pre>$( [ "$TIMEOUT" -ge "${MINRELOAD}" ] && ${BINARY} - < "${DATAFILE}" | grep -v 'MAC Address' | grep -v '(interleaved)' | grep -A99 'ADSL Status :' | sed 's/(fast)/      /' | head -n 7 )</pre><br>
+    <pre>$( [ "$TIMEOUT" -ge "${MINRELOAD}" ] && ${BINARY} - < "${DATAFILE}" | grep -v 'MAC Address' )</pre><br>
     <center><img border=0 src="${SCRIPT_NAME}?${PNGREQUEST}"></center>
   </body>
 </html>
