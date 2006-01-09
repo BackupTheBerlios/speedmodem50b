@@ -139,6 +139,13 @@
 #define TXT_VC_VPI "VC_VPI"
 #define TXT_VC_VCI "VC_VCI"
 
+#define TXT_FIRSTCHANNEL_UP "FIRSTCHANNEL_UP"
+#define TXT_LASTCHANNEL_UP "LASTCHANNEL_UP"
+#define TXT_FIRSTCHANNEL_DOWN "FIRSTCHANNEL_DOWN"
+#define TXT_LASTCHANNEL_DOWN "LASTCHANNEL_DOWN"
+
+#define def_firstDownstream 61
+
 #ifdef HAVE_LIBPNG
 #define png_col_R 0
 #define png_col_G 1
@@ -146,7 +153,6 @@
 #define png_col_A 3
 
 #define def_pilotTone 96
-#define def_firstDownstream 61
 
 #define def_diag_height 96
 #define def_diag_width_wide 1024
@@ -337,6 +343,11 @@ int main(int argc, char *argv[]) {
   unsigned int data_VC_VPI;
   unsigned int data_VC_VCI;
 
+  unsigned int data_FIRSTCHANNEL_UP;
+  unsigned int data_LASTCHANNEL_UP;
+  unsigned int data_FIRSTCHANNEL_DOWN=def_firstDownstream;
+  unsigned int data_LASTCHANNEL_DOWN;
+
 #ifdef HAVE_LIBPNG
   // libPNG-stuff
   int x, y, bits, bits_prev, bits_next;
@@ -353,7 +364,6 @@ int main(int argc, char *argv[]) {
   png_byte* pixel;
 
   unsigned int pilotTone=def_pilotTone;
-  unsigned int firstDownstream=def_firstDownstream;
   unsigned int diag_height=def_diag_height;
   unsigned int diag_width=def_diag_width_narrow;
   unsigned int diag_margin=def_diag_margin;
@@ -445,6 +455,19 @@ int main(int argc, char *argv[]) {
 
     data_LINESTATUS=msg[ADR_LINESTATUS];
 
+    for(tone=def_diag_fasttones; (tone>0)&&(getTone(tone)==0); --tone); data_LASTCHANNEL_DOWN=tone;
+    for(tone=0; (tone<def_diag_fasttones)&&(getTone(tone)==0); ++tone); data_FIRSTCHANNEL_UP=tone;
+
+    for(tone=data_FIRSTCHANNEL_UP;(tone<def_diag_fasttones)&&(getTone(tone)!=0||getTone(tone+1)!=0||getTone(tone+1)!=0); ++tone); data_LASTCHANNEL_UP=tone-1;
+    if(data_LASTCHANNEL_UP+1>=pilotTone)
+       for(tone=data_FIRSTCHANNEL_UP;(tone<def_diag_fasttones)&&(getTone(tone)!=0||getTone(tone+1)!=0); ++tone); data_LASTCHANNEL_UP=tone-1;
+    if(data_LASTCHANNEL_UP+1>=pilotTone)
+       for(tone=data_FIRSTCHANNEL_UP;(tone<def_diag_fasttones)&&(getTone(tone)!=0); ++tone); data_LASTCHANNEL_UP=tone-1;
+    if(data_LASTCHANNEL_UP+1>=pilotTone) data_LASTCHANNEL_UP=def_firstDownstream-1;
+
+    for(tone=data_LASTCHANNEL_UP+1; (tone<def_diag_fasttones)&&(getTone(tone)==0); ++tone); data_FIRSTCHANNEL_DOWN=tone;
+    data_FIRSTCHANNEL_DOWN=(tone<(data_LASTCHANNEL_DOWN/2))?tone:def_firstDownstream;
+
     buffer[0]=(argc>2&&strlen(argv[2])==2)?argv[2][1]:'h';
     switch(buffer[0]) {
        case 's':
@@ -492,6 +515,11 @@ int main(int argc, char *argv[]) {
           printf("%s=%u\n", TXT_VC_QOS, data_VC_QOS);
           printf("%s=%u\n", TXT_VC_VPI, data_VC_VPI);
           printf("%s=%u\n", TXT_VC_VCI, data_VC_VCI);
+
+          printf("%s=%u\n", TXT_FIRSTCHANNEL_UP, data_FIRSTCHANNEL_UP);
+          printf("%s=%u\n", TXT_LASTCHANNEL_UP, data_LASTCHANNEL_UP);
+          printf("%s=%u\n", TXT_FIRSTCHANNEL_DOWN, data_FIRSTCHANNEL_DOWN);
+          printf("%s=%u\n", TXT_LASTCHANNEL_DOWN, data_LASTCHANNEL_DOWN);
           break;
 
        case 'b':
@@ -500,13 +528,9 @@ int main(int argc, char *argv[]) {
 
 #ifdef HAVE_LIBPNG
        case 'p':
-          for(tone=def_diag_tones; tone<def_diag_fasttones; ++tone) diag_tones=(getTone(tone)!=0)?def_diag_fasttones:def_diag_tones;
-          //diag_width=(diag_tones==def_diag_fasttones)?def_diag_width_wide:def_diag_width_narrow;
+          diag_tones=(data_LASTCHANNEL_DOWN>=def_diag_tones)?def_diag_fasttones:def_diag_tones;
           diag_width=2*diag_tones;
 
-          for(tone=0; (tone<def_diag_fasttones)&&(getTone(tone)==0); ++tone);
-          for(; (tone<def_diag_fasttones)&&(getTone(tone)!=0||getTone(tone+1)!=0||getTone(tone+1)!=0); ++tone);
-          firstDownstream=(tone<(diag_tones/2))?tone:def_firstDownstream;
 
           height=diag_height+(2*diag_margin);
           width=diag_width+(2*diag_margin);
@@ -557,7 +581,7 @@ int main(int argc, char *argv[]) {
                    }
                   } else {
                     // balken
-                    if(tone>=firstDownstream) {
+                    if(tone>=data_FIRSTCHANNEL_DOWN) {
                       pixel[png_col_R]=downstreamR; pixel[png_col_G]=downstreamG; pixel[png_col_B]=downstreamB; pixel[png_col_A]=downstreamA;
                     } else {
                       pixel[png_col_R]=upstreamR; pixel[png_col_G]=upstreamG; pixel[png_col_B]=upstreamB; pixel[png_col_A]=upstreamA;
@@ -619,6 +643,8 @@ int main(int argc, char *argv[]) {
           printf("CRC error (interleaved)   : %10u %10u\n", data_CRC_INTER_DOWN, data_CRC_INTER_UP);
           printf("HEC error (fast)          : %10u %10u\n", data_HEC_FAST_DOWN, data_HEC_FAST_UP);
           printf("HEC error (interleaved)   : %10u %10u\n", data_HEC_INTER_DOWN, data_HEC_INTER_UP);
+          printf("First channel             : %10u %10u\n", data_FIRSTCHANNEL_DOWN, data_FIRSTCHANNEL_UP);
+          printf("Last channel              : %10u %10u\n", data_LASTCHANNEL_DOWN, data_LASTCHANNEL_UP);
           printf("Noise margin              :  %6.1f dB  %6.1f dB \n", frac_LINE_NOISE_DOWN, frac_LINE_NOISE_UP);
           printf("Attenuation               :  %6.1f dB  %6.1f dB \n", frac_LINE_ATT_DOWN, frac_LINE_ATT_UP);
           printf("Transmit power            :  %6.1f dBm %6.1f dBm\n", frac_LINE_XMITPWR_DOWN, frac_LINE_XMITPWR_UP);
