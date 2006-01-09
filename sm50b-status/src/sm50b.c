@@ -245,12 +245,16 @@ void printLineStatus(int status) {
 }
 
 char msg[MAX_MSG];
-
 void displayAt(unsigned int adr) {
    unsigned int data;
    char* buf = &msg[adr];
    byteSwap(buf, &data);
    printf("0x%04x : %5u\n", adr, data);
+}
+
+unsigned char* data_TONE=&msg[ADR_TONE0];
+unsigned int getTone(unsigned int tone) {
+   return (tone%2)?data_TONE[tone/2]/16:data_TONE[tone/2]%16;
 }
 
 int main(int argc, char *argv[]) {
@@ -265,7 +269,6 @@ int main(int argc, char *argv[]) {
   char* data_COUNTRY=&msg[ADR_COUNTRY];
   char* data_MAC=&msg[ADR_MAC];
   char* data_UPTIME=&msg[ADR_UPTIME];
-  unsigned char* data_TONE=&msg[ADR_TONE0];
   char* data_HOSTNAME=&msg[ADR_HOSTNAME];
   char* data_IP=&msg[ADR_IP];
   char* data_MASK=&msg[ADR_MASK];
@@ -497,10 +500,13 @@ int main(int argc, char *argv[]) {
 
 #ifdef HAVE_LIBPNG
        case 'p':
-          //unsigned int firstDownstream=def_firstDownstream;
-          for(tone=def_diag_tones; tone<def_diag_fasttones; ++tone) diag_tones=(((tone)%2?data_TONE[(tone)/2]/16:data_TONE[(tone)/2]%16)!=0)?def_diag_fasttones:def_diag_tones;
-          diag_width=(diag_tones==def_diag_fasttones)?def_diag_width_wide:def_diag_width_narrow;
-          //unsigned int diag_bits=def_diag_bits;
+          for(tone=0; (tone<def_diag_fasttones)&&(getTone(tone)==0); ++tone);
+          for(; (tone<def_diag_fasttones)&&(getTone(tone)!=0||getTone(tone+1)!=0||getTone(tone+1)!=0); ++tone);
+          firstDownstream=tone;
+
+          for(tone=def_diag_tones; tone<def_diag_fasttones; ++tone) diag_tones=(getTone(tone)!=0)?def_diag_fasttones:def_diag_tones;
+          //diag_width=(diag_tones==def_diag_fasttones)?def_diag_width_wide:def_diag_width_narrow;
+          diag_width=2*diag_tones;
 
           height=diag_height+(2*diag_margin);
           width=diag_width+(2*diag_margin);
@@ -531,7 +537,7 @@ int main(int argc, char *argv[]) {
                     !(tone%mark_nth_tone)) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
 
                 if(y>=diag_margin && y<height-diag_margin) {
-                  bits=(tone)%2?data_TONE[(tone)/2]/16:data_TONE[(tone)/2]%16;
+                  bits=getTone(tone);
 
                   if(height-y-diag_margin>bits*(diag_height/diag_bits)) {
                    // diag - hintergrund
@@ -543,8 +549,8 @@ int main(int argc, char *argv[]) {
                      pixel[png_col_R]=diagR; pixel[png_col_G]=diagG; pixel[png_col_B]=diagB; pixel[png_col_A]=diagA;
                    }
                    if(bits==0 && tone!=pilotTone) {
-                      bits_next=(tone+1)<diag_tones?((tone+1)%2?data_TONE[(tone+1)/2]/16:data_TONE[(tone+1)/2]%16):0;
-                      bits_prev=(tone-1)>=0?((tone-1)%2?data_TONE[(tone-1)/2]/16:data_TONE[(tone-1)/2]%16):0;
+                      bits_next=(tone+1)<diag_tones?getTone(tone+1):0;
+                      bits_prev=(tone-1)>=0?getTone(tone-1):0;
                       if((bits_prev!=0) || (bits_next!=0)) {
                         pixel[png_col_R]=zeroR; pixel[png_col_G]=zeroG; pixel[png_col_B]=zeroB; pixel[png_col_A]=zeroA;
                       }
