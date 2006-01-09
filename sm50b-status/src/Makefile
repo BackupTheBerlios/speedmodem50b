@@ -8,7 +8,7 @@ LIBS := $(shell test "$(LIBPNGCONFIG)" && $(LIBPNGCONFIG) --ldflags 2>/dev/null)
 STATIC := -static
 
 run:	sm50b sm50b.c
-	./sm50b 169.254.1.8 -h
+	./sm50b 192.168.1.1 -h || ./sm50b 169.254.1.8 -h
 
 
 sm50b: sm50b.c
@@ -49,9 +49,8 @@ copybin: sm50b
 copybin.linux: sm50b
 	cp sm50b ../sm50b
 
-copybin.exe: sm50b.exe sm50b.static.exe
+copybin.exe: sm50b.exe
 	cp sm50b.exe ../sm50b.exe
-	cp sm50b.static.exe ../sm50b.static.exe
 
 clean:
 	rm -f sm50b.o sm50b sm50b.exe sm50b.static.o sm50b.static sm50b.static.exe

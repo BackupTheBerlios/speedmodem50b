@@ -143,8 +143,10 @@
 #define TXT_LASTCHANNEL_UP "LASTCHANNEL_UP"
 #define TXT_FIRSTCHANNEL_DOWN "FIRSTCHANNEL_DOWN"
 #define TXT_LASTCHANNEL_DOWN "LASTCHANNEL_DOWN"
+#define TXT_GAPS "GAPS"
 
 #define def_firstDownstream 61
+#define def_pilotTone 96
 
 #ifdef HAVE_LIBPNG
 #define png_col_R 0
@@ -152,7 +154,6 @@
 #define png_col_B 2
 #define png_col_A 3
 
-#define def_pilotTone 96
 
 #define def_diag_height 96
 #define def_diag_width_wide 1024
@@ -195,10 +196,11 @@
 #define zeroB 30
 #define zeroA 255
 #define def_diag_tones 256
-#define def_diag_fasttones 512
 #define def_diag_bits 16
 #define def_mark_nth_tone 32
 #endif
+
+#define def_diag_fasttones 512
 
 int isReadable(int sd,int * error,int timeOut) {
   fd_set socketReadSet;
@@ -259,7 +261,9 @@ void displayAt(unsigned int adr) {
 }
 
 unsigned char* data_TONE=&msg[ADR_TONE0];
-unsigned int getTone(unsigned int tone) {
+unsigned int getTone(int tone) {
+   if(tone<0) return 0;
+   if(tone>=def_diag_fasttones) return 0;
    return (tone%2)?data_TONE[tone/2]/16:data_TONE[tone/2]%16;
 }
 
@@ -347,7 +351,9 @@ int main(int argc, char *argv[]) {
   unsigned int data_LASTCHANNEL_UP;
   unsigned int data_FIRSTCHANNEL_DOWN=def_firstDownstream;
   unsigned int data_LASTCHANNEL_DOWN;
+  unsigned int data_GAPS[def_diag_fasttones];
 
+  unsigned int pilotTone=def_pilotTone;
 #ifdef HAVE_LIBPNG
   // libPNG-stuff
   int x, y, bits, bits_prev, bits_next;
@@ -363,7 +369,6 @@ int main(int argc, char *argv[]) {
   png_byte* row;
   png_byte* pixel;
 
-  unsigned int pilotTone=def_pilotTone;
   unsigned int diag_height=def_diag_height;
   unsigned int diag_width=def_diag_width_narrow;
   unsigned int diag_margin=def_diag_margin;
@@ -468,6 +473,17 @@ int main(int argc, char *argv[]) {
     for(tone=data_LASTCHANNEL_UP+1; (tone<def_diag_fasttones)&&(getTone(tone)==0); ++tone); data_FIRSTCHANNEL_DOWN=tone;
     data_FIRSTCHANNEL_DOWN=(tone<(data_LASTCHANNEL_DOWN/2))?tone:def_firstDownstream;
 
+    for(tone=data_FIRSTCHANNEL_UP; tone<=data_LASTCHANNEL_DOWN; ++tone) {
+       data_GAPS[tone]=0;
+       if(tone<=data_LASTCHANNEL_UP||tone>=data_FIRSTCHANNEL_DOWN) {
+          if((getTone(tone-1)!=0)&&(getTone(tone)==0)) {
+             for(i=tone; (i<=data_LASTCHANNEL_DOWN)&&(getTone(i)==0); ++i); --i;
+             data_GAPS[(tone+i)/2]=1;
+             tone=i;
+          }
+       }
+    }
+
     buffer[0]=(argc>2&&strlen(argv[2])==2)?argv[2][1]:'h';
     switch(buffer[0]) {
        case 's':
@@ -520,6 +536,12 @@ int main(int argc, char *argv[]) {
           printf("%s=%u\n", TXT_LASTCHANNEL_UP, data_LASTCHANNEL_UP);
           printf("%s=%u\n", TXT_FIRSTCHANNEL_DOWN, data_FIRSTCHANNEL_DOWN);
           printf("%s=%u\n", TXT_LASTCHANNEL_DOWN, data_LASTCHANNEL_DOWN);
+          printf("%s=", TXT_GAPS);
+          for(tone=data_FIRSTCHANNEL_UP; tone<=data_LASTCHANNEL_DOWN && data_GAPS[tone]==0; ++tone);
+          if(tone<=data_LASTCHANNEL_DOWN && data_GAPS[tone]) printf("%u", tone);
+          for(tone; tone<=data_LASTCHANNEL_DOWN; ++tone)
+            if(data_GAPS[tone]) printf(",%u", tone);
+          printf("\n");
           break;
 
        case 'b':
@@ -643,11 +665,15 @@ int main(int argc, char *argv[]) {
           printf("CRC error (interleaved)   : %10u %10u\n", data_CRC_INTER_DOWN, data_CRC_INTER_UP);
           printf("HEC error (fast)          : %10u %10u\n", data_HEC_FAST_DOWN, data_HEC_FAST_UP);
           printf("HEC error (interleaved)   : %10u %10u\n", data_HEC_INTER_DOWN, data_HEC_INTER_UP);
-          printf("First channel             : %10u %10u\n", data_FIRSTCHANNEL_DOWN, data_FIRSTCHANNEL_UP);
-          printf("Last channel              : %10u %10u\n", data_LASTCHANNEL_DOWN, data_LASTCHANNEL_UP);
           printf("Noise margin              :  %6.1f dB  %6.1f dB \n", frac_LINE_NOISE_DOWN, frac_LINE_NOISE_UP);
           printf("Attenuation               :  %6.1f dB  %6.1f dB \n", frac_LINE_ATT_DOWN, frac_LINE_ATT_UP);
           printf("Transmit power            :  %6.1f dBm %6.1f dBm\n", frac_LINE_XMITPWR_DOWN, frac_LINE_XMITPWR_UP);
+          printf("First channel             : %10u %10u\n", data_FIRSTCHANNEL_DOWN, data_FIRSTCHANNEL_UP);
+          printf("Last channel              : %10u %10u\n", data_LASTCHANNEL_DOWN, data_LASTCHANNEL_UP);
+          printf("Channel gaps              : ");
+          for(tone=data_FIRSTCHANNEL_UP; tone<=data_LASTCHANNEL_DOWN; ++tone)
+             if(data_GAPS[tone]) printf("%u ", tone);
+          printf("\n");
 
           for(tone=0; tone<(ADR_TONE_END-ADR_TONE0); ++tone) {
              if(!(tone%16)) printf("\ntone %3u-%3u:", (2*tone), (2*tone)+31);
@@ -660,6 +686,8 @@ int main(int argc, char *argv[]) {
           displayAt(0x150);
           displayAt(0x152);
           displayAt(0x2ee);
+          displayAt(0x2f0);
+          displayAt(0x2f2);
           break;
 
        default:
