@@ -36,7 +36,6 @@
 #include <png.h>
 #endif
 
-
 #define REMOTE_SERVER_PORT 0xaaaa
 #define MAX_MSG 1492
 #define SOCKET_ERROR -1
@@ -139,6 +138,61 @@
 #define TXT_VC_QOS "VC_QOS"
 #define TXT_VC_VPI "VC_VPI"
 #define TXT_VC_VCI "VC_VCI"
+
+#ifdef HAVE_LIBPNG
+#define png_col_R 0
+#define png_col_G 1
+#define png_col_B 2
+#define png_col_A 3
+
+#define def_pilotTone 96
+#define def_firstDownstream 61
+
+#define def_diag_height 96
+#define def_diag_width_wide 1024
+#define def_diag_width_narrow 512
+#define def_diag_margin 20
+#define def_mark_tone_len 4
+#define def_mark_bit_len 4
+#define def_mark_bit_longlen 6
+
+#define bgR 233
+#define bgG 241
+#define bgB 254
+#define bgA 255
+#define diagR 138
+#define diagG 179
+#define diagB 189
+#define diagA 255
+#define bitR 128
+#define bitG 128
+#define bitB 128
+#define bitA 255
+#define markR 0
+#define markG 0
+#define markB 0
+#define markA 255
+#define upstreamR 0
+#define upstreamG 255 
+#define upstreamB 0
+#define upstreamA 255
+#define downstreamR 0
+#define downstreamG 0
+#define downstreamB 255
+#define downstreamA 255
+#define pilotR 240
+#define pilotG 30
+#define pilotB 30
+#define pilotA 255
+#define zeroR 220
+#define zeroG 220
+#define zeroB 30
+#define zeroA 255
+#define def_diag_tones 256
+#define def_diag_fasttones 512
+#define def_diag_bits 16
+#define def_mark_nth_tone 32
+#endif
 
 int isReadable(int sd,int * error,int timeOut) {
   fd_set socketReadSet;
@@ -294,6 +348,18 @@ int main(int argc, char *argv[]) {
   png_bytep * rows;
   png_byte* row;
   png_byte* pixel;
+
+  unsigned int pilotTone=def_pilotTone;
+  unsigned int firstDownstream=def_firstDownstream;
+  unsigned int diag_height=def_diag_height;
+  unsigned int diag_width=def_diag_width_narrow;
+  unsigned int diag_margin=def_diag_margin;
+  unsigned int mark_tone_len=def_mark_tone_len;
+  unsigned int mark_bit_len=def_mark_bit_len;
+  unsigned int mark_bit_longlen=def_mark_bit_longlen;
+  unsigned int diag_tones=def_diag_tones;
+  unsigned int diag_bits=def_diag_bits;
+  unsigned int mark_nth_tone=def_mark_nth_tone;
 #endif
 
   if(argc!=2 && argc!=3) {
@@ -431,53 +497,10 @@ int main(int argc, char *argv[]) {
 
 #ifdef HAVE_LIBPNG
        case 'p':
-#define png_col_R 0
-#define png_col_G 1
-#define png_col_B 2
-#define png_col_A 3
-
-#define pilotTone 96
-#define firstDownstream 61
-
-#define diag_height 96
-#define diag_width 1024
-#define diag_margin 20
-#define mark_tone_len 4
-#define mark_bit_len 4
-#define mark_bit_longlen 6
-
-#define bgR 233
-#define bgG 241
-#define bgB 254
-#define bgA 255
-#define diagR 138
-#define diagG 179
-#define diagB 189
-#define diagA 255
-#define bitR 128
-#define bitG 128
-#define bitB 128
-#define bitA 255
-#define markR 0
-#define markG 0
-#define markB 0
-#define markA 255
-#define upstreamR 0
-#define upstreamG 255 
-#define upstreamB 0
-#define upstreamA 255
-#define downstreamR 0
-#define downstreamG 0
-#define downstreamB 255
-#define downstreamA 255
-#define pilotR 240
-#define pilotG 30
-#define pilotB 30
-#define pilotA 255
-#define zeroR 220
-#define zeroG 220
-#define zeroB 30
-#define zeroA 255
+          //unsigned int firstDownstream=def_firstDownstream;
+          for(tone=def_diag_tones; tone<def_diag_fasttones; ++tone) diag_tones=(((tone)%2?data_TONE[(tone)/2]/16:data_TONE[(tone)/2]%16)!=0)?def_diag_fasttones:def_diag_tones;
+          diag_width=(diag_tones==def_diag_fasttones)?def_diag_width_wide:def_diag_width_narrow;
+          //unsigned int diag_bits=def_diag_bits;
 
           height=diag_height+(2*diag_margin);
           width=diag_width+(2*diag_margin);
@@ -495,22 +518,22 @@ int main(int argc, char *argv[]) {
 
               if(x+1==diag_margin && (y>=diag_margin && y<=height-diag_margin) ) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
 
-              if((x>(diag_margin-mark_bit_longlen)) && (x<diag_margin) && y>=diag_margin && y<=height-diag_margin && !((height-y-diag_margin)%(diag_height/16))) {
+              if((x>(diag_margin-mark_bit_longlen)) && (x<diag_margin) && y>=diag_margin && y<=height-diag_margin && !((height-y-diag_margin)%(diag_height/diag_bits))) {
                 if(x>(diag_margin-mark_bit_len)) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
                 if(!((height-y-diag_margin)%(diag_height/8))) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
               }
 
               if(x>=diag_margin && x<width-diag_margin) {
-                tone=(x-diag_margin)*512/diag_width;
+                tone=(x-diag_margin)*diag_tones/diag_width;
                 if(y==height-diag_margin) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
                 if( (y>=height-diag_margin+1) &&
                     (y<=height-diag_margin+mark_tone_len) &&
-                    !(tone%32)) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
+                    !(tone%mark_nth_tone)) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
 
                 if(y>=diag_margin && y<height-diag_margin) {
                   bits=(tone)%2?data_TONE[(tone)/2]/16:data_TONE[(tone)/2]%16;
 
-                  if(height-y-diag_margin>bits*(diag_height/16)) {
+                  if(height-y-diag_margin>bits*(diag_height/diag_bits)) {
                    // diag - hintergrund
                    if(tone==pilotTone) { 
                      pixel[png_col_R]=pilotR; pixel[png_col_G]=pilotG; pixel[png_col_B]=pilotB; pixel[png_col_A]=pilotA;
@@ -520,7 +543,7 @@ int main(int argc, char *argv[]) {
                      pixel[png_col_R]=diagR; pixel[png_col_G]=diagG; pixel[png_col_B]=diagB; pixel[png_col_A]=diagA;
                    }
                    if(bits==0 && tone!=pilotTone) {
-                      bits_next=(tone+1)<512?((tone+1)%2?data_TONE[(tone+1)/2]/16:data_TONE[(tone+1)/2]%16):0;
+                      bits_next=(tone+1)<diag_tones?((tone+1)%2?data_TONE[(tone+1)/2]/16:data_TONE[(tone+1)/2]%16):0;
                       bits_prev=(tone-1)>=0?((tone-1)%2?data_TONE[(tone-1)/2]/16:data_TONE[(tone-1)/2]%16):0;
                       if((bits_prev!=0) || (bits_next!=0)) {
                         pixel[png_col_R]=zeroR; pixel[png_col_G]=zeroG; pixel[png_col_B]=zeroB; pixel[png_col_A]=zeroA;
