@@ -45,7 +45,7 @@ Content-Type: text/html
     <title>Connection status of SpeedModem 50B on :  $(date -r "${DATAFILE}")</title>
   </head>
   <body>
-    <pre>$( [ "$TIMEOUT" -ge "${MINRELOAD}" ] && ${BINARY} - < "${DATAFILE}" | grep -v 'MAC Address' )</pre><br>
+    <pre>$( [ "$TIMEOUT" -ge "${MINRELOAD}" ] && ${BINARY} - < "${DATAFILE}" | grep -v 'MAC Address' )</pre>
     <center><img border=0 src="${SCRIPT_NAME}?${PNGREQUEST}"></center>
   </body>
 </html>
