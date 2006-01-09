@@ -500,13 +500,13 @@ int main(int argc, char *argv[]) {
 
 #ifdef HAVE_LIBPNG
        case 'p':
-          for(tone=0; (tone<def_diag_fasttones)&&(getTone(tone)==0); ++tone);
-          for(; (tone<def_diag_fasttones)&&(getTone(tone)!=0||getTone(tone+1)!=0||getTone(tone+1)!=0); ++tone);
-          firstDownstream=tone;
-
           for(tone=def_diag_tones; tone<def_diag_fasttones; ++tone) diag_tones=(getTone(tone)!=0)?def_diag_fasttones:def_diag_tones;
           //diag_width=(diag_tones==def_diag_fasttones)?def_diag_width_wide:def_diag_width_narrow;
           diag_width=2*diag_tones;
+
+          for(tone=0; (tone<def_diag_fasttones)&&(getTone(tone)==0); ++tone);
+          for(; (tone<def_diag_fasttones)&&(getTone(tone)!=0||getTone(tone+1)!=0||getTone(tone+1)!=0); ++tone);
+          firstDownstream=(tone<(diag_tones/2))?tone:def_firstDownstream;
 
           height=diag_height+(2*diag_margin);
           width=diag_width+(2*diag_margin);
