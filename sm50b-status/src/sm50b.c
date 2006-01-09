@@ -577,8 +577,8 @@ int main(int argc, char *argv[]) {
           printf("Hostname         : %s\n\n", data_HOSTNAME);
 
           printf("ADSL Status:\n");
-          printf("ADSL Status : "); printLineStatus(data_LINESTATUS); printf("\n");
-          printf("ADSL Uptime : %s\n", data_UPTIME);
+          printf("LINE Status : "); printLineStatus(data_LINESTATUS); printf("\n");
+          printf("LINE Uptime : %s\n", data_UPTIME);
           printf("ATM vc      : vpi=%u vci=%u qos=%u\n", data_VC_VPI, data_VC_VCI, data_VC_QOS);
           printf("                                down         up\n");
           printf("Bit-rate  (fast)          : %10u %10u\n", data_BANDWIDTH_FAST_DOWN, data_BANDWIDTH_FAST_UP);
@@ -590,9 +590,9 @@ int main(int argc, char *argv[]) {
           printf("CRC error (interleaved)   : %10u %10u\n", data_CRC_INTER_DOWN, data_CRC_INTER_UP);
           printf("HEC error (fast)          : %10u %10u\n", data_HEC_FAST_DOWN, data_HEC_FAST_UP);
           printf("HEC error (interleaved)   : %10u %10u\n", data_HEC_INTER_DOWN, data_HEC_INTER_UP);
-          printf("Noise margin              : %6.1f dB  %6.1f dB \n", frac_LINE_NOISE_DOWN, frac_LINE_NOISE_UP);
-          printf("Attenuation               : %6.1f dB  %6.1f dB \n", frac_LINE_ATT_DOWN, frac_LINE_ATT_UP);
-          printf("Transmit power            : %6.1f dBm %6.1f dBm\n", frac_LINE_XMITPWR_DOWN, frac_LINE_XMITPWR_UP);
+          printf("Noise margin              :  %6.1f dB  %6.1f dB \n", frac_LINE_NOISE_DOWN, frac_LINE_NOISE_UP);
+          printf("Attenuation               :  %6.1f dB  %6.1f dB \n", frac_LINE_ATT_DOWN, frac_LINE_ATT_UP);
+          printf("Transmit power            :  %6.1f dBm %6.1f dBm\n", frac_LINE_XMITPWR_DOWN, frac_LINE_XMITPWR_UP);
 
           for(tone=0; tone<(ADR_TONE_END-ADR_TONE0); ++tone) {
              if(!(tone%16)) printf("\ntone %3u-%3u:", (2*tone), (2*tone)+31);
