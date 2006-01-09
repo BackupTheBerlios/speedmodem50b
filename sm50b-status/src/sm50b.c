@@ -69,13 +69,13 @@
 #define ADR_HEC_INTER_UP 0x16a
 
 #define ADR_LINE_RELLOAD_DOWN 0x16c   // in %
-#define ADR_LINE_NOISE_DOWN 0x16e     // in 1/10*dBm
-#define ADR_LINE_ATT_DOWN 0x172       // in 1/10*dBm
+#define ADR_LINE_NOISE_DOWN 0x16e     // in 1/10*dB
+#define ADR_LINE_XMITPWR_UP 0x170     // in 1/10*dBm
+#define ADR_LINE_ATT_DOWN 0x172       // in 1/10*dB
 #define ADR_LINE_RELLOAD_UP 0x174     // in %
-#define ADR_LINE_NOISE_UP 0x176       // in 1/10*dBm
-#define ADR_LINE_ATT_UP 0x17a         // in 1/10*dBm
-#define ADR_LINE_XMITPWR_UP 0x170 // in 1/10*dBm
-#define ADR_LINE_XMITPWR_DOWN 0x178 // in 1/10*dBm
+#define ADR_LINE_NOISE_UP 0x176       // in 1/10*dB
+#define ADR_LINE_XMITPWR_DOWN 0x178   // in 1/10*dBm
+#define ADR_LINE_ATT_UP 0x17a         // in 1/10*dB
 
 #define ADR_TONE0 0x17c
 #define ADR_TONE_END 0x27c
@@ -590,8 +590,8 @@ int main(int argc, char *argv[]) {
           printf("CRC error (interleaved)   : %10u %10u\n", data_CRC_INTER_DOWN, data_CRC_INTER_UP);
           printf("HEC error (fast)          : %10u %10u\n", data_HEC_FAST_DOWN, data_HEC_FAST_UP);
           printf("HEC error (interleaved)   : %10u %10u\n", data_HEC_INTER_DOWN, data_HEC_INTER_UP);
-          printf("Noise margin              : %6.1f dBm %6.1f dBm\n", frac_LINE_NOISE_DOWN, frac_LINE_NOISE_UP);
-          printf("Attenuation               : %6.1f dBm %6.1f dBm\n", frac_LINE_ATT_DOWN, frac_LINE_ATT_UP);
+          printf("Noise margin              : %6.1f dB  %6.1f dB \n", frac_LINE_NOISE_DOWN, frac_LINE_NOISE_UP);
+          printf("Attenuation               : %6.1f dB  %6.1f dB \n", frac_LINE_ATT_DOWN, frac_LINE_ATT_UP);
           printf("Transmit power            : %6.1f dBm %6.1f dBm\n", frac_LINE_XMITPWR_DOWN, frac_LINE_XMITPWR_UP);
 
           for(tone=0; tone<(ADR_TONE_END-ADR_TONE0); ++tone) {
