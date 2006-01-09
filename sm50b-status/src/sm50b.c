@@ -539,7 +539,7 @@ int main(int argc, char *argv[]) {
           printf("%s=", TXT_GAPS);
           for(tone=data_FIRSTCHANNEL_UP; tone<=data_LASTCHANNEL_DOWN && data_GAPS[tone]==0; ++tone);
           if(tone<=data_LASTCHANNEL_DOWN && data_GAPS[tone]) printf("%u", tone);
-          for(tone; tone<=data_LASTCHANNEL_DOWN; ++tone)
+          for(++tone; tone<=data_LASTCHANNEL_DOWN; ++tone)
             if(data_GAPS[tone]) printf(",%u", tone);
           printf("\n");
           break;
