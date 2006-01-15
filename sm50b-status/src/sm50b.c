@@ -692,7 +692,7 @@ int main(int argc, char *argv[]) {
           displayAt(0x2f0);
           displayAt(0x2f2);
           printf("BitSum   (U, D) : (%11u, %11u)\n", data_BITSUM_UP, data_BITSUM_DOWN);
-          printf("BitQuote (U, D) : (%5.5f, %5.5u)\n",
+          printf("BitQuote (U, D) : (%5.5f, %5.5f)\n",
                 ((float)(data_BANDWIDTH_FAST_UP+data_BANDWIDTH_INTER_UP))
                 /
                 ((float)data_BITSUM_UP)
