@@ -353,8 +353,8 @@ int main(int argc, char *argv[]) {
   unsigned int data_GAPS[def_diag_fasttones];
   unsigned int data_BITSUM_UP;
   unsigned int data_BITSUM_DOWN;
-  unsigned float data_BITQUOTE_UP;
-  unsigned float data_BITQUOTE_DOWN;
+  float data_BITQUOTE_UP;
+  float data_BITQUOTE_DOWN;
 
   unsigned int pilotTone=def_pilotTone;
 #ifdef HAVE_LIBPNG
