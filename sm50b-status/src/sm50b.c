@@ -353,6 +353,8 @@ int main(int argc, char *argv[]) {
   unsigned int data_GAPS[def_diag_fasttones];
   unsigned int data_BITSUM_UP;
   unsigned int data_BITSUM_DOWN;
+  unsigned int data_BITQUOTE_UP;
+  unsigned int data_BITQUOTE_DOWN;
 
   unsigned int pilotTone=def_pilotTone;
 #ifdef HAVE_LIBPNG
@@ -486,6 +488,8 @@ int main(int argc, char *argv[]) {
           if(tone<data_FIRSTCHANNEL_DOWN) data_BITSUM_UP+=getTone(tone); else data_BITSUM_DOWN+=getTone(tone);
        }
     }
+   data_BITQUOTE_UP   = ((float)(data_BANDWIDTH_FAST_DOWN+data_BANDWIDTH_INTER_DOWN))/((float)data_BITSUM_DOWN);
+   data_BITQUOTE_DOWN = ((float)(data_BANDWIDTH_FAST_UP+data_BANDWIDTH_INTER_UP))/((float)data_BITSUM_UP);
 
     buffer[0]=(argc>2&&strlen(argv[2])==2)?argv[2][1]:'h';
     switch(buffer[0]) {
@@ -691,16 +695,8 @@ int main(int argc, char *argv[]) {
           displayAt(0x2ee);
           displayAt(0x2f0);
           displayAt(0x2f2);
-          printf("BitSum   (U, D) : (%11u, %11u)\n", data_BITSUM_UP, data_BITSUM_DOWN);
-          printf("BitQuote (U, D) : (%5.5f, %5.5f)\n",
-                ((float)(data_BANDWIDTH_FAST_UP+data_BANDWIDTH_INTER_UP))
-                /
-                ((float)data_BITSUM_UP)
-              ,
-                ((float)(data_BANDWIDTH_FAST_DOWN+data_BANDWIDTH_INTER_DOWN))
-                /
-                ((float)data_BITSUM_DOWN)
-              );
+          printf("BitSum   (U, D) : (%7u, %7u)\n", data_BITSUM_UP, data_BITSUM_DOWN);
+          printf("BitQuote (U, D) : (%5.5f, %5.5f)\n", data_BITQUOTE_UP, data_BITQUOTE_DOWN);
           break;
 
        default:
