@@ -154,7 +154,6 @@
 #define png_col_B 2
 #define png_col_A 3
 
-
 #define def_diag_height 96
 #define def_diag_width_wide 1024
 #define def_diag_width_narrow 512
@@ -352,6 +351,8 @@ int main(int argc, char *argv[]) {
   unsigned int data_FIRSTCHANNEL_DOWN=def_firstDownstream;
   unsigned int data_LASTCHANNEL_DOWN;
   unsigned int data_GAPS[def_diag_fasttones];
+  unsigned int data_BITSUM_UP;
+  unsigned int data_BITSUM_DOWN;
 
   unsigned int pilotTone=def_pilotTone;
 #ifdef HAVE_LIBPNG
@@ -473,6 +474,7 @@ int main(int argc, char *argv[]) {
     for(tone=data_LASTCHANNEL_UP+1; (tone<def_diag_fasttones)&&(getTone(tone)==0); ++tone); data_FIRSTCHANNEL_DOWN=tone;
     data_FIRSTCHANNEL_DOWN=(tone<(data_LASTCHANNEL_DOWN/2))?tone:def_firstDownstream;
 
+    data_BITSUM_UP=data_BITSUM_DOWN=0;
     for(tone=data_FIRSTCHANNEL_UP; tone<=data_LASTCHANNEL_DOWN; ++tone) {
        data_GAPS[tone]=0;
        if(tone<=data_LASTCHANNEL_UP||tone>=data_FIRSTCHANNEL_DOWN) {
@@ -481,6 +483,7 @@ int main(int argc, char *argv[]) {
              data_GAPS[(tone+i)/2]=1;
              tone=i;
           }
+          if(tone<data_FIRSTCHANNEL_DOWN) data_BITSUM_UP+=getTone(tone); else data_BITSUM_DOWN+=getTone(tone);
        }
     }
 
@@ -688,6 +691,16 @@ int main(int argc, char *argv[]) {
           displayAt(0x2ee);
           displayAt(0x2f0);
           displayAt(0x2f2);
+          printf("BitSum   (U, D) : (%11u, %11u)\n", data_BITSUM_UP, data_BITSUM_DOWN);
+          printf("BitQuote (U, D) : (%5.5f, %5.5u)\n",
+                ((float)(data_BANDWIDTH_FAST_UP+data_BANDWIDTH_INTER_UP))
+                /
+                ((float)data_BITSUM_UP)
+              ,
+                ((float)(data_BANDWIDTH_FAST_DOWN+data_BANDWIDTH_INTER_DOWN))
+                /
+                ((float)data_BITSUM_DOWN)
+              );
           break;
 
        default:
