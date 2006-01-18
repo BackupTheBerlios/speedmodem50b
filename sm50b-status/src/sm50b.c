@@ -139,6 +139,9 @@
 #define TXT_VC_VPI "VC_VPI"
 #define TXT_VC_VCI "VC_VCI"
 
+#define TXT_BANDWIDTH_DOWN_MAX "LINE_BW_DOWN_MAX"
+#define TXT_BANDWIDTH_UP_MAX "LINE_BW_UP_MAX"
+
 #define TXT_FIRSTCHANNEL_UP "FIRSTCHANNEL_UP"
 #define TXT_LASTCHANNEL_UP "LASTCHANNEL_UP"
 #define TXT_FIRSTCHANNEL_DOWN "FIRSTCHANNEL_DOWN"
@@ -346,6 +349,9 @@ int main(int argc, char *argv[]) {
   unsigned int data_VC_VPI;
   unsigned int data_VC_VCI;
 
+  unsigned int data_BANDWIDTH_DOWN_MAX;
+  unsigned int data_BANDWIDTH_UP_MAX;
+
   unsigned int data_FIRSTCHANNEL_UP;
   unsigned int data_LASTCHANNEL_UP;
   unsigned int data_FIRSTCHANNEL_DOWN=def_firstDownstream;
@@ -454,6 +460,9 @@ int main(int argc, char *argv[]) {
     byteSwap(data_LINE_XMITPWR_DOWN_buf, &data_LINE_XMITPWR_DOWN); byteSwap(data_LINE_ATT_UP_buf, &data_LINE_ATT_UP);
     byteSwap(data_VC_QOS_buf, &data_VC_QOS); byteSwap(data_VC_VPI_buf, &data_VC_VPI); byteSwap(data_VC_VCI_buf, &data_VC_VCI);
 
+    data_BANDWIDTH_DOWN_MAX=(int)(100.0f*((float)(data_BANDWIDTH_FAST_DOWN+data_BANDWIDTH_INTER_DOWN))/((float)data_LINE_RELLOAD_DOWN));
+    data_BANDWIDTH_UP_MAX=(int)(100.0f*((float)(data_BANDWIDTH_FAST_UP+data_BANDWIDTH_INTER_UP))/((float)data_LINE_RELLOAD_UP));
+
     frac_LINE_NOISE_DOWN=0.1f*((double)data_LINE_NOISE_DOWN);
     frac_LINE_XMITPWR_UP=0.1f*((double)data_LINE_XMITPWR_UP);
     frac_LINE_ATT_DOWN=0.1f*((double)data_LINE_ATT_DOWN);
@@ -504,8 +513,10 @@ int main(int argc, char *argv[]) {
           printf("%s=%s\n", TXT_UPTIME, data_UPTIME);
           printf("%s=%u\n", TXT_BANDWIDTH_FAST_DOWN, data_BANDWIDTH_FAST_DOWN);
           printf("%s=%u\n", TXT_BANDWIDTH_INTER_DOWN, data_BANDWIDTH_INTER_DOWN);
+          printf("%s=%u\n", TXT_BANDWIDTH_DOWN_MAX, data_BANDWIDTH_DOWN_MAX);
           printf("%s=%u\n", TXT_BANDWIDTH_FAST_UP, data_BANDWIDTH_FAST_UP);
           printf("%s=%u\n", TXT_BANDWIDTH_INTER_UP, data_BANDWIDTH_INTER_UP);
+          printf("%s=%u\n", TXT_BANDWIDTH_UP_MAX, data_BANDWIDTH_UP_MAX);
           printf("%s=%u\n", TXT_FEC_FAST_DOWN, data_FEC_FAST_DOWN);
           printf("%s=%u\n", TXT_FEC_INTER_DOWN, data_FEC_INTER_DOWN);
           printf("%s=%u\n", TXT_CRC_FAST_DOWN, data_CRC_FAST_DOWN);
@@ -663,20 +674,21 @@ int main(int argc, char *argv[]) {
           printf("LINE Uptime : %s\n", data_UPTIME);
           printf("ATM vc      : vpi=%u vci=%u qos=%u\n", data_VC_VPI, data_VC_VCI, data_VC_QOS);
           printf("                                down         up\n");
-          printf("Bit-rate  (fast)          : %10u %10u\n", data_BANDWIDTH_FAST_DOWN, data_BANDWIDTH_FAST_UP);
-          printf("Bit-rate  (interleaved)   : %10u %10u\n", data_BANDWIDTH_INTER_DOWN, data_BANDWIDTH_INTER_UP);
-          printf("Bit-rate  (relative cap.) : %8u %% %8u %%\n", data_LINE_RELLOAD_DOWN, data_LINE_RELLOAD_UP);
-          printf("FEC error (fast)          : %10u %10u\n", data_FEC_FAST_DOWN, data_FEC_FAST_UP);
-          printf("FEC error (interleaved)   : %10u %10u\n", data_FEC_INTER_DOWN, data_FEC_INTER_UP);
-          printf("CRC error (fast)          : %10u %10u\n", data_CRC_FAST_DOWN, data_CRC_FAST_UP);
-          printf("CRC error (interleaved)   : %10u %10u\n", data_CRC_INTER_DOWN, data_CRC_INTER_UP);
-          printf("HEC error (fast)          : %10u %10u\n", data_HEC_FAST_DOWN, data_HEC_FAST_UP);
-          printf("HEC error (interleaved)   : %10u %10u\n", data_HEC_INTER_DOWN, data_HEC_INTER_UP);
-          printf("Noise margin              :  %6.1f dB  %6.1f dB \n", frac_LINE_NOISE_DOWN, frac_LINE_NOISE_UP);
-          printf("Attenuation               :  %6.1f dB  %6.1f dB \n", frac_LINE_ATT_DOWN, frac_LINE_ATT_UP);
-          printf("Transmit power            :  %6.1f dBm %6.1f dBm\n", frac_LINE_XMITPWR_DOWN, frac_LINE_XMITPWR_UP);
-          printf("First channel             : %10u %10u\n", data_FIRSTCHANNEL_DOWN, data_FIRSTCHANNEL_UP);
-          printf("Last channel              : %10u %10u\n", data_LASTCHANNEL_DOWN, data_LASTCHANNEL_UP);
+          printf("Bit-rate  (fast)          :  %10u  %10u\n", data_BANDWIDTH_FAST_DOWN, data_BANDWIDTH_FAST_UP);
+          printf("Bit-rate  (interleaved)   :  %10u  %10u\n", data_BANDWIDTH_INTER_DOWN, data_BANDWIDTH_INTER_UP);
+          printf("Bit-rate  (relative cap.) :  %8u %%  %8u %%\n", data_LINE_RELLOAD_DOWN, data_LINE_RELLOAD_UP);
+          printf("Bit-rate  (max)           :  %10u  %10u\n", data_BANDWIDTH_DOWN_MAX, data_BANDWIDTH_UP_MAX);
+          printf("FEC error (fast)          :  %10u  %10u\n", data_FEC_FAST_DOWN, data_FEC_FAST_UP);
+          printf("FEC error (interleaved)   :  %10u  %10u\n", data_FEC_INTER_DOWN, data_FEC_INTER_UP);
+          printf("CRC error (fast)          :  %10u  %10u\n", data_CRC_FAST_DOWN, data_CRC_FAST_UP);
+          printf("CRC error (interleaved)   :  %10u  %10u\n", data_CRC_INTER_DOWN, data_CRC_INTER_UP);
+          printf("HEC error (fast)          :  %10u  %10u\n", data_HEC_FAST_DOWN, data_HEC_FAST_UP);
+          printf("HEC error (interleaved)   :  %10u  %10u\n", data_HEC_INTER_DOWN, data_HEC_INTER_UP);
+          printf("Noise margin              :   %6.1f dB   %6.1f dB \n", frac_LINE_NOISE_DOWN, frac_LINE_NOISE_UP);
+          printf("Attenuation               :   %6.1f dB   %6.1f dB \n", frac_LINE_ATT_DOWN, frac_LINE_ATT_UP);
+          printf("Transmit power            :   %6.1f dBm  %6.1f dBm\n", frac_LINE_XMITPWR_DOWN, frac_LINE_XMITPWR_UP);
+          printf("First channel             :  %10u  %10u\n", data_FIRSTCHANNEL_DOWN, data_FIRSTCHANNEL_UP);
+          printf("Last channel              :  %10u  %10u\n", data_LASTCHANNEL_DOWN, data_LASTCHANNEL_UP);
           printf("Channel gaps              : ");
           for(tone=data_FIRSTCHANNEL_UP; tone<=data_LASTCHANNEL_DOWN; ++tone)
              if(data_GAPS[tone]) printf("%u ", tone);
