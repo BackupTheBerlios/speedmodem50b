@@ -460,8 +460,8 @@ int main(int argc, char *argv[]) {
     byteSwap(data_LINE_XMITPWR_DOWN_buf, &data_LINE_XMITPWR_DOWN); byteSwap(data_LINE_ATT_UP_buf, &data_LINE_ATT_UP);
     byteSwap(data_VC_QOS_buf, &data_VC_QOS); byteSwap(data_VC_VPI_buf, &data_VC_VPI); byteSwap(data_VC_VCI_buf, &data_VC_VCI);
 
-    data_BANDWIDTH_DOWN_MAX=(int)(100.0f*((float)(data_BANDWIDTH_FAST_DOWN+data_BANDWIDTH_INTER_DOWN))/((float)data_LINE_RELLOAD_DOWN));
-    data_BANDWIDTH_UP_MAX=(int)(100.0f*((float)(data_BANDWIDTH_FAST_UP+data_BANDWIDTH_INTER_UP))/((float)data_LINE_RELLOAD_UP));
+    data_BANDWIDTH_DOWN_MAX=data_LINE_RELLOAD_DOWN?(int)(100.0f*((float)(data_BANDWIDTH_FAST_DOWN+data_BANDWIDTH_INTER_DOWN))/((float)data_LINE_RELLOAD_DOWN)):0;
+    data_BANDWIDTH_UP_MAX=data_LINE_RELLOAD_UP?(int)(100.0f*((float)(data_BANDWIDTH_FAST_UP+data_BANDWIDTH_INTER_UP))/((float)data_LINE_RELLOAD_UP)):0;
 
     frac_LINE_NOISE_DOWN=0.1f*((double)data_LINE_NOISE_DOWN);
     frac_LINE_XMITPWR_UP=0.1f*((double)data_LINE_XMITPWR_UP);
@@ -484,6 +484,8 @@ int main(int argc, char *argv[]) {
 
     for(tone=data_LASTCHANNEL_UP+1; (tone<def_diag_fasttones)&&(getTone(tone)==0); ++tone); data_FIRSTCHANNEL_DOWN=tone;
     data_FIRSTCHANNEL_DOWN=(tone<(data_LASTCHANNEL_DOWN/2))?tone:def_firstDownstream;
+    if(data_FIRSTCHANNEL_DOWN>data_LASTCHANNEL_DOWN) data_FIRSTCHANNEL_DOWN=data_LASTCHANNEL_DOWN=0;
+    if(data_FIRSTCHANNEL_UP>data_LASTCHANNEL_UP) data_FIRSTCHANNEL_UP=data_LASTCHANNEL_UP=0;
 
     data_BITSUM_UP=data_BITSUM_DOWN=0;
     for(tone=data_FIRSTCHANNEL_UP; tone<=data_LASTCHANNEL_DOWN; ++tone) {
