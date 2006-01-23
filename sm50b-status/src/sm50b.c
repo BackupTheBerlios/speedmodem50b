@@ -676,16 +676,35 @@ int main(int argc, char *argv[]) {
           printf("LINE Uptime : %s\n", data_UPTIME);
           printf("ATM vc      : vpi=%u vci=%u qos=%u\n", data_VC_VPI, data_VC_VCI, data_VC_QOS);
           printf("                                down         up\n");
-          printf("Bit-rate  (fast)          :  %10u  %10u\n", data_BANDWIDTH_FAST_DOWN, data_BANDWIDTH_FAST_UP);
-          printf("Bit-rate  (interleaved)   :  %10u  %10u\n", data_BANDWIDTH_INTER_DOWN, data_BANDWIDTH_INTER_UP);
+          if(data_BANDWIDTH_FAST_DOWN+data_BANDWIDTH_FAST_UP+data_BANDWIDTH_INTER_DOWN+data_BANDWIDTH_INTER_UP==0)
+             printf("Bit-rate                  :  %10u  %10u\n", 0, 0);
+          if(data_BANDWIDTH_FAST_DOWN+data_BANDWIDTH_FAST_UP!=0)
+             printf("Bit-rate  (fast)          :  %10u  %10u\n", data_BANDWIDTH_FAST_DOWN, data_BANDWIDTH_FAST_UP);
+          if(data_BANDWIDTH_INTER_DOWN+data_BANDWIDTH_INTER_UP!=0)
+             printf("Bit-rate  (interleaved)   :  %10u  %10u\n", data_BANDWIDTH_INTER_DOWN, data_BANDWIDTH_INTER_UP);
           printf("Bit-rate  (relative cap.) :  %8u %%  %8u %%\n", data_LINE_RELLOAD_DOWN, data_LINE_RELLOAD_UP);
           printf("Bit-rate  (max)           :  %10u  %10u\n", data_BANDWIDTH_DOWN_MAX, data_BANDWIDTH_UP_MAX);
-          printf("FEC error (fast)          :  %10u  %10u\n", data_FEC_FAST_DOWN, data_FEC_FAST_UP);
-          printf("FEC error (interleaved)   :  %10u  %10u\n", data_FEC_INTER_DOWN, data_FEC_INTER_UP);
-          printf("CRC error (fast)          :  %10u  %10u\n", data_CRC_FAST_DOWN, data_CRC_FAST_UP);
-          printf("CRC error (interleaved)   :  %10u  %10u\n", data_CRC_INTER_DOWN, data_CRC_INTER_UP);
-          printf("HEC error (fast)          :  %10u  %10u\n", data_HEC_FAST_DOWN, data_HEC_FAST_UP);
-          printf("HEC error (interleaved)   :  %10u  %10u\n", data_HEC_INTER_DOWN, data_HEC_INTER_UP);
+          if(data_BANDWIDTH_FAST_DOWN+data_BANDWIDTH_FAST_UP+data_BANDWIDTH_FAST_DOWN+data_BANDWIDTH_FAST_UP==0)
+             printf("FEC error                 :  %10u  %10u\n", 0,0);
+          if(data_BANDWIDTH_FAST_DOWN+data_BANDWIDTH_FAST_UP!=0)
+             printf("FEC error (fast)          :  %10u  %10u\n", data_FEC_FAST_DOWN, data_FEC_FAST_UP);
+          if(data_BANDWIDTH_INTER_DOWN+data_BANDWIDTH_INTER_UP!=0)
+             printf("FEC error (interleaved)   :  %10u  %10u\n", data_FEC_INTER_DOWN, data_FEC_INTER_UP);
+
+          if(data_BANDWIDTH_FAST_DOWN+data_BANDWIDTH_FAST_UP+data_BANDWIDTH_FAST_DOWN+data_BANDWIDTH_FAST_UP==0)
+             printf("CRC error                 :  %10u  %10u\n", 0, 0);
+          if(data_BANDWIDTH_FAST_DOWN+data_BANDWIDTH_FAST_UP!=0)
+             printf("CRC error (fast)          :  %10u  %10u\n", data_CRC_FAST_DOWN, data_CRC_FAST_UP);
+          if(data_BANDWIDTH_INTER_DOWN+data_BANDWIDTH_INTER_UP!=0)
+             printf("CRC error (interleaved)   :  %10u  %10u\n", data_CRC_INTER_DOWN, data_CRC_INTER_UP);
+
+          if(data_BANDWIDTH_FAST_DOWN+data_BANDWIDTH_FAST_UP+data_BANDWIDTH_FAST_DOWN+data_BANDWIDTH_FAST_UP==0)
+             printf("HEC error                 :  %10u  %10u\n", 0, 0);
+          if(data_BANDWIDTH_FAST_DOWN+data_BANDWIDTH_FAST_UP!=0)
+             printf("HEC error (fast)          :  %10u  %10u\n", data_HEC_FAST_DOWN, data_HEC_FAST_UP);
+          if(data_BANDWIDTH_INTER_DOWN+data_BANDWIDTH_INTER_UP!=0)
+             printf("HEC error (interleaved)   :  %10u  %10u\n", data_HEC_INTER_DOWN, data_HEC_INTER_UP);
+
           printf("Noise margin              :   %6.1f dB   %6.1f dB \n", frac_LINE_NOISE_DOWN, frac_LINE_NOISE_UP);
           printf("Attenuation               :   %6.1f dB   %6.1f dB \n", frac_LINE_ATT_DOWN, frac_LINE_ATT_UP);
           printf("Transmit power            :   %6.1f dBm  %6.1f dBm\n", frac_LINE_XMITPWR_DOWN, frac_LINE_XMITPWR_UP);
