@@ -5,7 +5,7 @@ LIBPNGCONFIG := $(shell which $(LIBPNGCONFIG) 2>/dev/null)
 HAVELIBPNG := $(shell test "$(LIBPNGCONFIG)" && echo '-DHAVE_LIBPNG')
 CFLAGS := $(shell test "$(LIBPNGCONFIG)" && $(LIBPNGCONFIG) --cflags 2>/dev/null)
 LIBS := $(shell test "$(LIBPNGCONFIG)" && $(LIBPNGCONFIG) --ldflags 2>/dev/null)
-STATIC := -static
+STATIC := -static 
 
 run:	sm50b sm50b.c
 	./sm50b 192.168.1.1 -h || ./sm50b 169.254.1.8 -h
@@ -16,7 +16,7 @@ sm50b: sm50b.c
 	[ "$(OS)" != "Windows_NT" ] && make sm50b.linux || true
 
 sm50b.linux: sm50b.c
-	gcc -o sm50b $(CFLAGS) $(LIBS) $(HAVELIBPNG) sm50b.c || make sm50b.linux.nolibpng
+	gcc -o sm50b $(CFLAGS) $(LIBS) $(HAVELIBPNG) -lgd sm50b.c || make sm50b.linux.nolibpng
 
 sm50b.linux.nolibpng: sm50b.c libpngerror
 	gcc -o sm50b sm50b.c
