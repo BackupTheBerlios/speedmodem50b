@@ -34,6 +34,9 @@
 
 #ifdef HAVE_LIBPNG
 #include <png.h>
+#include <gd.h>
+#include <gdfonts.h>
+#include <gdfontt.h>
 #endif
 
 #define REMOTE_SERVER_PORT 0xaaaa
@@ -387,6 +390,17 @@ int main(int argc, char *argv[]) {
   unsigned int diag_tones=def_diag_tones;
   unsigned int diag_bits=def_diag_bits;
   unsigned int mark_nth_tone=def_mark_nth_tone;
+
+  // gd stuff
+  gdImagePtr image;
+  FILE *out;
+  int downstream, pilot, zero, mark, bg, diag, bit,upstream;
+  char tonemark[11]="hello123456";
+  int styleDashed[8];
+  int styleDotted[8];
+  char toneptr;
+
+
 #endif
 
   if(argc!=2 && argc!=3) {
@@ -570,94 +584,164 @@ int main(int argc, char *argv[]) {
 
 #ifdef HAVE_LIBPNG
        case 'p':
-          diag_tones=(data_LASTCHANNEL_DOWN>=def_diag_tones)?def_diag_fasttones:def_diag_tones;
-          diag_width=2*diag_tones;
 
+if (strcmp(data_STD,"ADSL2 PLUS")==0)
+		diag_width=def_diag_width_wide;
 
           height=diag_height+(2*diag_margin);
-          width=diag_width+(2*diag_margin);
-          
-          bit_depth=8;
-          rows=malloc(height*sizeof(png_bytep));
-          for (y=0; y<height; y++)
-		rows[y]=malloc(width*bit_depth*4);
+          width=diag_width+(2*diag_margin)+1;//+1 for last mark
+  image     = gdImageCreate(width, height);
+  bg        =gdImageColorAllocate(image,bgR,bgG,bgB);
+  diag        =gdImageColorAllocate(image,diagR,diagG,diagB);
+  
+downstream=gdImageColorAllocate(image,downstreamR,downstreamG,downstreamB);
+  mark      =gdImageColorAllocate(image,markR,markG,markB);
+  bit       =gdImageColorAllocate(image,bitR,bitG,bitB);
+  upstream  =gdImageColorAllocate(image,upstreamR,upstreamG,upstreamB);
+  pilot     =gdImageColorAllocate(image,pilotR,pilotG,pilotB);
+  zero      =gdImageColorAllocate(image,zeroR,zeroG,zeroB);
+    styleDotted[0]=diag;
+    styleDotted[1]=diag;
+    styleDotted[2]=diag;
+    styleDotted[3]=diag;
+    styleDotted[4]=bit;
+    styleDotted[5]=bit;//gdTransparent;
+    styleDotted[6]=bit;//gdTransparent;
+    styleDotted[7]=bit;//gdTransparent;
+    char *toneptr=tonemark;
+//linie links
+    gdImageLine(image,19,20,19,20+diag_height,mark);
+//Linie rechts
+    gdImageLine(image,diag_width+20,20,diag_width+20,20+diag_height,mark);
+//Linie oben
+    gdImageLine(image,20,20,diag_width+20,20,mark);
+//Linie unten
+    
+    gdImageLine(image,20,20+diag_height,diag_width+20,20+diag_height,mark);
+//auffüllen
+    gdImageFill(image,25,45,diag);
 
-          for (x=0; x<width; x++) {
-            for (y=0; y<height; y++) {
-              row = rows[y]; pixel=&(row[x*4]);
 
-              pixel[png_col_R]=bgR; pixel[png_col_G]=bgG; pixel[png_col_B]=bgB; pixel[png_col_A]=bgA;
 
-              if(x+1==diag_margin && (y>=diag_margin && y<=height-diag_margin) ) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
+//Markierungen Links
+    x=0;
+    for (y=0;y<9;y++)
+    {
+    sprintf(tonemark,"%2i",x);
+        gdImageString(image,gdFontGetSmall(),
+                20-17,diag_height-(y*12)+13,toneptr,mark);
+    gdImageLine(image,19,diag_height-(y*12)+20,15,diag_height-(y*12)+20,mark);
+    if(y>=1&&y<=7){
+	gdImageSetStyle(image,styleDotted,8);
+        gdImageLine(image,21,diag_height-(y*12)+20,19+diag_width,                    
+	    diag_height-(y*12)+20,gdStyled);
 
-              if((x>(diag_margin-mark_bit_longlen)) && (x<diag_margin) && y>=diag_margin && y<=height-diag_margin && !((height-y-diag_margin)%(diag_height/diag_bits))) {
-                if(x>(diag_margin-mark_bit_len)) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
-                if(!((height-y-diag_margin)%(diag_height/8))) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
-              }
+}
+    if(y<8)
+    
+    gdImageLine(image,19,diag_height-(y*12)+14,17,diag_height-(y*12)+14,mark);
+    x+=2;
+    }
+//Markierungen unten und oben
+    y=0;
+    for (x=0;x<17;x++)
+    {
+    if(y>1)
+    {
+    sprintf(tonemark,"%2i",y);
+    if(y>100)
+        gdImageString(image,gdFontGetSmall(),
+                12+(y*2),diag_height+24,toneptr,mark);
+        else
+        gdImageString(image,gdFontGetSmall(),
+                15+(y*2),diag_height+24,toneptr,mark);
 
-              if(x>=diag_margin && x<width-diag_margin) {
-                tone=(x-diag_margin)*diag_tones/diag_width;
-                if(y==height-diag_margin) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
-                if( (y>=height-diag_margin+1) &&
-                    (y<=height-diag_margin+mark_tone_len) &&
-                    !(tone%mark_nth_tone)) { pixel[png_col_R]=markR; pixel[png_col_G]=markG; pixel[png_col_B]=markB; pixel[png_col_A]=markA; }
-
-                if(y>=diag_margin && y<height-diag_margin) {
-                  bits=getTone(tone);
-
-                  if(height-y-diag_margin>bits*(diag_height/diag_bits)) {
-                   // diag - hintergrund
-                   if(tone==pilotTone) { 
-                     pixel[png_col_R]=pilotR; pixel[png_col_G]=pilotG; pixel[png_col_B]=pilotB; pixel[png_col_A]=pilotA;
-                   } else if(! ((height-y-diag_margin)%(diag_height/8)) ) {
-                     pixel[png_col_R]=bitR; pixel[png_col_G]=bitG; pixel[png_col_B]=bitB; pixel[png_col_A]=bitA;
-                   } else {
-                     pixel[png_col_R]=diagR; pixel[png_col_G]=diagG; pixel[png_col_B]=diagB; pixel[png_col_A]=diagA;
-                   }
-                   if(bits==0 && tone!=pilotTone) {
-                      bits_next=(tone+1)<diag_tones?getTone(tone+1):0;
-                      bits_prev=(tone-1)>=0?getTone(tone-1):0;
-                      if((bits_prev!=0) || (bits_next!=0)) {
-                        pixel[png_col_R]=zeroR; pixel[png_col_G]=zeroG; pixel[png_col_B]=zeroB; pixel[png_col_A]=zeroA;
-                      }
-                   }
-                  } else {
-                    // balken
-                    if(tone>=data_FIRSTCHANNEL_DOWN) {
-                      pixel[png_col_R]=downstreamR; pixel[png_col_G]=downstreamG; pixel[png_col_B]=downstreamB; pixel[png_col_A]=downstreamA;
-                    } else {
-                      pixel[png_col_R]=upstreamR; pixel[png_col_G]=upstreamG; pixel[png_col_B]=upstreamB; pixel[png_col_A]=upstreamA;
-                    }
-                  }
+    if(y>226)   {
+        sprintf(tonemark,"%2i",((y/32)*138));
+        gdImageString(image,gdFontGetSmall(),
+                7+(y*2),4,toneptr,mark);
                 }
-              }
+                else
+                {
+        sprintf(tonemark,"%2i",((y/32)*138));
+        gdImageString(image,gdFontGetSmall(),
+                12+(y*2),4,toneptr,mark);
+                }
+
+
+    }
+    if ((y*2)<1024)
+    
+gdImageLine(image,21+(y*2),diag_height+20,21+(y*2),diag_height+24,mark);
+    
+gdImageLine(image,20+(y*2),diag_height+20,20+(y*2),diag_height+24,mark);
+if (y>1)
+{
+    if(y<500){
+    gdImageSetStyle(image,styleDotted,8);
+    gdImageLine(image,21+(y*2),21,21+(y*2),diag_height+19,gdStyled);
+    gdImageSetStyle(image,styleDotted,8);
+    gdImageLine(image,20+(y*2),21,20+(y*2),diag_height+19,gdStyled);
             }
-          }
+}
+    y+=32;
+    }
+//  print diag
 
-          /* initialize stuff */
-	  if(!(png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL))) { printf("error 1\n"); return 1; }
-	  if(!(info_ptr = png_create_info_struct(png_ptr))) { printf("error 2"); return 1; }
-          if(setjmp(png_jmpbuf(png_ptr))) { printf("error 3"); return 1; }
-          png_init_io(png_ptr, stdout);
+    x=0;
 
-          /* write header */
-          if(setjmp(png_jmpbuf(png_ptr))) { printf("error 4"); return 1; }
-          png_set_IHDR(png_ptr, info_ptr, width, height,
-		     bit_depth, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
-		     PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-	  png_write_info(png_ptr, info_ptr);
+    while(x<(ADR_TONE_END-ADR_TONE0)){
+    int color;
+    int tone;
 
-          /* write bytes */
-          if(setjmp(png_jmpbuf(png_ptr))) { printf("error 5"); return 1; }
-          png_write_image(png_ptr, rows);
+    // upstream green tones   downstream blue
+    if (x<(64/2)) // from tone 64 downstream
+            color=upstream;
+        else
+            color=downstream;
 
-          /* end write */
-          if(setjmp(png_jmpbuf(png_ptr))) { printf("error 6"); return 1; }
-          png_write_end(png_ptr, NULL);
+    // 2 tones at a time
+    tone=data_TONE[x]&15;  //first 4 bits  2 pixel wide
+    if (tone)   {
+    gdImageLine(image,(x*4)+diag_margin,diag_height+19,(x*4)+diag_margin,
+	    diag_height+diag_margin-(tone*6), color);
+    
+    gdImageLine(image,(x*4)+diag_margin+1,diag_height+19,(x*4)+diag_margin+1,
+	    diag_height+diag_margin-(tone*6), color);
+                }
+    tone=data_TONE[x]>>4;  //upper 4 bits
+    if (tone)   {
+    
+    gdImageLine(image,(x*4)+diag_margin+2,diag_height+19,(x*4)+diag_margin+2,
+    	    diag_height+diag_margin-(tone*6), color);
+    
+    gdImageLine(image,(x*4)+diag_margin+3,diag_height+19,(x*4)+diag_margin+3,
+	    diag_height+diag_margin-(tone*6), color);
+                }
 
-          for (y=0; y<height; y++)
-		free(rows[y]);
-	  free(rows);
+
+if(x==(pilotTone/2))  //Pilottone
+        {
+    gdImageLine(image,(x*4)+20,diag_height+19,(x*4)+20,21, pilot);
+    gdImageLine(image,(x*4)+21,diag_height+19,(x*4)+21,21, pilot);
+        }
+
+     x++;   // next 2 tones
+
+    }
+
+
+
+
+//printf("%s ",argv[3]);
+// write png to file
+//  out=fopen("test.png","wb");
+  gdImagePng(image,stdout);
+//  fclose(out);
+// Free GD image
+  gdImageDestroy(image);
+
+
           break;
 #endif
 
