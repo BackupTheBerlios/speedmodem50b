@@ -153,6 +153,7 @@
 
 #define def_firstDownstream 61
 #define def_pilotTone 96
+#define def_pilotTone_wide 119
 
 #ifdef HAVE_LIBPNG
 #define png_col_R 0
@@ -229,7 +230,7 @@ int isReadable(int sd,int * error,int timeOut) {
 
 char buffer[2];
 
-void byteSwap(char* src, int* dst) {
+void byteSwap(char* src, unsigned int* dst) {
    (*dst)=256*(src[0]<0?256+src[0]:src[0])+(src[1]<0?256+src[1]:src[1]);
 }
 
@@ -274,7 +275,8 @@ unsigned int getTone(int tone) {
 
 int main(int argc, char *argv[]) {
   unsigned short int s;
-  int sd, rc, i, n, echoLen, flags, error, timeOut, retries, tone;
+  int sd, rc, i, n, flags, error, timeOut, retries, tone;
+  unsigned int echoLen;
   struct sockaddr_in cliAddr, remoteServAddr, echoServAddr;
   struct hostent *h;
   char* data_BB=&msg[ADR_BB];
@@ -585,21 +587,25 @@ int main(int argc, char *argv[]) {
 #ifdef HAVE_LIBPNG
        case 'p':
 
-if (strcmp(data_STD,"ADSL2 PLUS")==0)
-		diag_width=def_diag_width_wide;
-
-          height=diag_height+(2*diag_margin);
-          width=diag_width+(2*diag_margin)+1;//+1 for last mark
-  image     = gdImageCreate(width, height);
-  bg        =gdImageColorAllocate(image,bgR,bgG,bgB);
-  diag        =gdImageColorAllocate(image,diagR,diagG,diagB);
-  
-downstream=gdImageColorAllocate(image,downstreamR,downstreamG,downstreamB);
-  mark      =gdImageColorAllocate(image,markR,markG,markB);
-  bit       =gdImageColorAllocate(image,bitR,bitG,bitB);
-  upstream  =gdImageColorAllocate(image,upstreamR,upstreamG,upstreamB);
-  pilot     =gdImageColorAllocate(image,pilotR,pilotG,pilotB);
-  zero      =gdImageColorAllocate(image,zeroR,zeroG,zeroB);
+	if (strcmp(data_STD,"ADSL2 PLUS")==0)
+		{
+		diag_width = def_diag_width_wide;
+		pilotTone  = def_pilotTone_wide;
+		}
+		
+  height = diag_height+(2*diag_margin);
+  width  = diag_width+(2*diag_margin)+1;//+1 for last mark
+  image  = gdImageCreate(width, height);
+  bg     = gdImageColorAllocate(image,bgR,bgG,bgB);
+  diag   = gdImageColorAllocate(image,diagR,diagG,diagB);
+    
+  // colors
+  downstream  = gdImageColorAllocate(image,downstreamR,downstreamG,downstreamB);
+  mark        = gdImageColorAllocate(image,markR,markG,markB);
+  bit         = gdImageColorAllocate(image,bitR,bitG,bitB);
+  upstream    = gdImageColorAllocate(image,upstreamR,upstreamG,upstreamB);
+  pilot       = gdImageColorAllocate(image,pilotR,pilotG,pilotB);
+  zero        = gdImageColorAllocate(image,zeroR,zeroG,zeroB);
     styleDotted[0]=diag;
     styleDotted[1]=diag;
     styleDotted[2]=diag;
@@ -608,22 +614,24 @@ downstream=gdImageColorAllocate(image,downstreamR,downstreamG,downstreamB);
     styleDotted[5]=bit;//gdTransparent;
     styleDotted[6]=bit;//gdTransparent;
     styleDotted[7]=bit;//gdTransparent;
-    char *toneptr=tonemark;
-//linie links
+    unsigned char *toneptr=tonemark;
+
+
+//line left
     gdImageLine(image,19,20,19,20+diag_height,mark);
-//Linie rechts
+//right
     gdImageLine(image,diag_width+20,20,diag_width+20,20+diag_height,mark);
-//Linie oben
+//top
     gdImageLine(image,20,20,diag_width+20,20,mark);
-//Linie unten
+//bottom
     
     gdImageLine(image,20,20+diag_height,diag_width+20,20+diag_height,mark);
-//auffüllen
+//fill the rec
     gdImageFill(image,25,45,diag);
 
 
 
-//Markierungen Links
+//marks left
     x=0;
     for (y=0;y<9;y++)
     {
@@ -636,20 +644,20 @@ downstream=gdImageColorAllocate(image,downstreamR,downstreamG,downstreamB);
         gdImageLine(image,21,diag_height-(y*12)+20,19+diag_width,                    
 	    diag_height-(y*12)+20,gdStyled);
 
-}
+    }
     if(y<8)
     
     gdImageLine(image,19,diag_height-(y*12)+14,17,diag_height-(y*12)+14,mark);
     x+=2;
     }
-//Markierungen unten und oben
+//marks top and bottom
     y=0;
     for (x=0;x<17;x++)
     {
     if(y>1)
     {
     sprintf(tonemark,"%2i",y);
-    if(y>100)
+    if(y>100) 
         gdImageString(image,gdFontGetSmall(),
                 12+(y*2),diag_height+24,toneptr,mark);
         else
@@ -670,27 +678,30 @@ downstream=gdImageColorAllocate(image,downstreamR,downstreamG,downstreamB);
 
 
     }
-    if ((y*2)<1024)
-    
-gdImageLine(image,21+(y*2),diag_height+20,21+(y*2),diag_height+24,mark);
-    
-gdImageLine(image,20+(y*2),diag_height+20,20+(y*2),diag_height+24,mark);
-if (y>1)
-{
-    if(y<500){
-    gdImageSetStyle(image,styleDotted,8);
-    gdImageLine(image,21+(y*2),21,21+(y*2),diag_height+19,gdStyled);
-    gdImageSetStyle(image,styleDotted,8);
-    gdImageLine(image,20+(y*2),21,20+(y*2),diag_height+19,gdStyled);
-            }
-}
+    if ((y*2)<diag_width)
+	    gdImageLine(image,21+(y*2),diag_height+20,21+(y*2),diag_height+24,mark);
+
+	gdImageLine(image,20+(y*2),diag_height+20,20+(y*2),diag_height+24,mark);
+
+    if (y>1)
+	{
+	    if(y<(diag_width/2)){
+	    gdImageSetStyle(image,styleDotted,8);
+	    gdImageLine(image,21+(y*2),21,21+(y*2),diag_height+19,gdStyled);
+	    gdImageSetStyle(image,styleDotted,8);
+	    gdImageLine(image,20+(y*2),21,20+(y*2),diag_height+19,gdStyled);
+	                }
+	}
     y+=32;
     }
-//  print diag
+    
+    
+    //  print diag
 
     x=0;
-
-    while(x<(ADR_TONE_END-ADR_TONE0)){
+    int x1=0;
+    int z=1;
+    while(x<(diag_width/4)){//)ADR_TONE_END-ADR_TONE0)){
     int color;
     int tone;
 
@@ -701,35 +712,48 @@ if (y>1)
             color=downstream;
 
     // 2 tones at a time
-    tone=data_TONE[x]&15;  //first 4 bits  2 pixel wide
-    if (tone)   {
-    gdImageLine(image,(x*4)+diag_margin,diag_height+19,(x*4)+diag_margin,
-	    diag_height+diag_margin-(tone*6), color);
-    
-    gdImageLine(image,(x*4)+diag_margin+1,diag_height+19,(x*4)+diag_margin+1,
-	    diag_height+diag_margin-(tone*6), color);
-                }
+
+if ((x1%2)==1)
+{    tone=data_TONE[x]&15;  //first 4 bits  2 pixel wide
+}
+else
+    {
     tone=data_TONE[x]>>4;  //upper 4 bits
+x++;
+}
     if (tone)   {
+    gdImageLine(image,	(x1)+diag_margin+x1+2,diag_height+19,
+			(x1)+diag_margin+x1+2,
+	    diag_height+diag_margin-(tone*6), color);
     
-    gdImageLine(image,(x*4)+diag_margin+2,diag_height+19,(x*4)+diag_margin+2,
-    	    diag_height+diag_margin-(tone*6), color);
-    
-    gdImageLine(image,(x*4)+diag_margin+3,diag_height+19,(x*4)+diag_margin+3,
+    gdImageLine(image,	(x1)+diag_margin+x1+3,diag_height+19,
+			(x1)+diag_margin+x1+3,
 	    diag_height+diag_margin-(tone*6), color);
                 }
+    
+
+//    x++;
+//    if (tone)   {
+//    gdImageLine(image,(x*4)+diag_margin+2,diag_height+19,(x*4)+diag_margin+2,
+//    	    diag_height+diag_margin-(tone*6), color);
+    
+//    gdImageLine(image,(x*4)+diag_margin+3,diag_height+19,(x*4)+diag_margin+3,
+//	    diag_height+diag_margin-(tone*6), color);
+//                }
 
 
-if(x==(pilotTone/2))  //Pilottone
+if(x==(pilotTone))  //Pilottone
         {
-    gdImageLine(image,(x*4)+20,diag_height+19,(x*4)+20,21, pilot);
-    gdImageLine(image,(x*4)+21,diag_height+19,(x*4)+21,21, pilot);
+    gdImageLine(image,	(x1)+diag_margin+2,diag_height+19,
+			(x1)+diag_margin+2,21, pilot);
+    gdImageLine(image,	(x1)+diag_margin+3,diag_height+19,
+			(x1)+diag_margin+3,21, pilot);
         }
 
-     x++;   // next 2 tones
-
+    // x++;   // next 2 tones
+    x1++;
+    z^=z;
     }
-
 
 
 
