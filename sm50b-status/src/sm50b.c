@@ -586,12 +586,9 @@ int main(int argc, char *argv[]) {
 
 #ifdef HAVE_LIBPNG
        case 'p':
-
-	if (strcmp(data_STD,"ADSL2 PLUS")==0)
-		{
-		diag_width = def_diag_width_wide;
-		pilotTone  = def_pilotTone_wide;
-		}
+       //debug dsl - dsl2+
+//sprintf(data_STD,"ADSL1 PLUS");  
+diag_width=def_diag_width_narrow;
 		
   height = diag_height+(2*diag_margin);
   width  = diag_width+(2*diag_margin)+1;//+1 for last mark
@@ -651,12 +648,17 @@ int main(int argc, char *argv[]) {
     x+=2;
     }
 //marks top and bottom
+
+
     y=0;
-    for (x=0;x<17;x++)
+    for (x=0;x<15;x++)
     {
     if(y>1)
     {
-    sprintf(tonemark,"%2i",y);
+    //bins 
+    sprintf(tonemark,"%2i",
+    y*(strcmp(data_STD,"ADSL2 PLUS")?1:2)
+    );
     if(y>100) 
         gdImageString(image,gdFontGetSmall(),
                 12+(y*2),diag_height+24,toneptr,mark);
@@ -665,13 +667,18 @@ int main(int argc, char *argv[]) {
                 15+(y*2),diag_height+24,toneptr,mark);
 
     if(y>226)   {
-        sprintf(tonemark,"%2i",((y/32)*138));
+	//tones
+        sprintf(tonemark,"%2i",((y/32)*
+	(strcmp(data_STD,"ADSL2 PLUS")?138:276) 
+	));
         gdImageString(image,gdFontGetSmall(),
                 7+(y*2),4,toneptr,mark);
                 }
                 else
                 {
-        sprintf(tonemark,"%2i",((y/32)*138));
+        sprintf(tonemark,"%2i",((y/32)*
+	(strcmp(data_STD,"ADSL2 PLUS")?138:276) 
+	));
         gdImageString(image,gdFontGetSmall(),
                 12+(y*2),4,toneptr,mark);
                 }
@@ -692,7 +699,7 @@ int main(int argc, char *argv[]) {
 	    gdImageLine(image,20+(y*2),21,20+(y*2),diag_height+19,gdStyled);
 	                }
 	}
-    y+=32;
+    y+=	32; // 32 pixel wide
     }
     
     
@@ -700,59 +707,48 @@ int main(int argc, char *argv[]) {
 
     x=0;
     int x1=0;
-    int z=1;
-    while(x<(diag_width/4)){//)ADR_TONE_END-ADR_TONE0)){
+
+    while(x<(diag_width/(strcmp(data_STD,"ADSL2 PLUS")?4:2))){//)ADR_TONE_END-ADR_TONE0)){
     int color;
     int tone;
 
-    // upstream green tones   downstream blue
-    if (x<(64/2)) // from tone 64 downstream
+    // upstream 32-63 green tones   64-512 downstream blue
+    if (x<(64/2)) // from tone 64 -> downstream
             color=upstream;
         else
             color=downstream;
 
-    // 2 tones at a time
+    if ((x1%2)==1)
+	tone=data_TONE[x]&15;  //first 4 bits  2 pixel wide
+	else
+	    {
+	    tone=data_TONE[x]>>4;	//upper 4 bits
+	    x++; 			// next 2 Tones
+	    }
 
-if ((x1%2)==1)
-{    tone=data_TONE[x]&15;  //first 4 bits  2 pixel wide
-}
-else
-    {
-    tone=data_TONE[x]>>4;  //upper 4 bits
-x++;
-}
+
     if (tone)   {
-    gdImageLine(image,	(x1)+diag_margin+x1+2,diag_height+19,
-			(x1)+diag_margin+x1+2,
+    gdImageLine(image,	(x1)+diag_margin+(strcmp(data_STD,"ADSL2 PLUS")?(x1+2):1),diag_height+19,
+			(x1)+diag_margin+(strcmp(data_STD,"ADSL2 PLUS")?(x1+2):1),
 	    diag_height+diag_margin-(tone*6), color);
     
+    if  (strcmp(data_STD,"ADSL2 PLUS"))
     gdImageLine(image,	(x1)+diag_margin+x1+3,diag_height+19,
 			(x1)+diag_margin+x1+3,
 	    diag_height+diag_margin-(tone*6), color);
                 }
-    
 
-//    x++;
-//    if (tone)   {
-//    gdImageLine(image,(x*4)+diag_margin+2,diag_height+19,(x*4)+diag_margin+2,
-//    	    diag_height+diag_margin-(tone*6), color);
-    
-//    gdImageLine(image,(x*4)+diag_margin+3,diag_height+19,(x*4)+diag_margin+3,
-//	    diag_height+diag_margin-(tone*6), color);
-//                }
+    if(x==(pilotTone)&&strcmp(data_STD,"ADSL2 PLUS"))  //Pilottone
+	    {
+		gdImageLine(image,x1+diag_margin+2,diag_height+19,
+				    x1+diag_margin+2,21, pilot);
+	        gdImageLine(image,x1+diag_margin+3,diag_height+19,
+		    		    x1+diag_margin+3,21, pilot);
+	    }
+    	    
 
+    x1++;	// print next tone line
 
-if(x==(pilotTone))  //Pilottone
-        {
-    gdImageLine(image,	(x1)+diag_margin+2,diag_height+19,
-			(x1)+diag_margin+2,21, pilot);
-    gdImageLine(image,	(x1)+diag_margin+3,diag_height+19,
-			(x1)+diag_margin+3,21, pilot);
-        }
-
-    // x++;   // next 2 tones
-    x1++;
-    z^=z;
     }
 
 
@@ -818,10 +814,16 @@ if(x==(pilotTone))  //Pilottone
           printf("Transmit power            :   %6.1f dBm  %6.1f dBm\n", frac_LINE_XMITPWR_DOWN, frac_LINE_XMITPWR_UP);
           printf("First channel             :  %10u  %10u\n", data_FIRSTCHANNEL_DOWN, data_FIRSTCHANNEL_UP);
           printf("Last channel              :  %10u  %10u\n", data_LASTCHANNEL_DOWN, data_LASTCHANNEL_UP);
-          printf("Channel gaps              : ");
+          printf("Channel gaps              :  ");
+
           for(tone=data_FIRSTCHANNEL_UP; tone<=data_LASTCHANNEL_DOWN; ++tone)
              if(data_GAPS[tone]) printf("%u ", tone);
+
+
+
           printf("\n");
+
+
 
           for(tone=0; tone<(ADR_TONE_END-ADR_TONE0); ++tone) {
              if(!(tone%16)) printf("\ntone %3u-%3u:", (2*tone), (2*tone)+31);

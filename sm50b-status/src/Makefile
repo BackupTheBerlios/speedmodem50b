@@ -3,6 +3,11 @@ default: sm50b
 LIBPNGCONFIG := libpng-config
 LIBPNGCONFIG := $(shell which $(LIBPNGCONFIG) 2>/dev/null)
 HAVELIBPNG := $(shell test "$(LIBPNGCONFIG)" && echo '-DHAVE_LIBPNG')
+
+GDLIBCONFIG := gdlib-config
+GDLIBCONFIG := $(shell which $(GDLIBCONFIG) 2>/dev/null)
+HAVEGDLIB := $(shell test "$(GDLIBCONFIG)" && echo '-DHAVE_GDLIB')
+
 CFLAGS := $(shell test "$(LIBPNGCONFIG)" && $(LIBPNGCONFIG) --cflags 2>/dev/null)
 LIBS := $(shell test "$(LIBPNGCONFIG)" && $(LIBPNGCONFIG) --ldflags 2>/dev/null)
 STATIC := -static 
@@ -16,7 +21,7 @@ sm50b: sm50b.c
 	[ "$(OS)" != "Windows_NT" ] && make sm50b.linux || true
 
 sm50b.linux: sm50b.c
-	gcc -o sm50b $(CFLAGS) $(LIBS) $(HAVELIBPNG) -lgd sm50b.c || make sm50b.linux.nolibpng
+	gcc -o sm50b $(CFLAGS) $(LIBS) $(HAVELIBPNG) $(HAVEGDLIB) -lgd -lfreetype -lz sm50b.c || make sm50b.linux.nolibpng
 
 sm50b.linux.nolibpng: sm50b.c libpngerror
 	gcc -o sm50b sm50b.c
