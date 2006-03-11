@@ -21,7 +21,7 @@ sm50b: sm50b.c
 	[ "$(OS)" != "Windows_NT" ] && make sm50b.linux || true
 
 sm50b.linux: sm50b.c
-	gcc -o sm50b $(CFLAGS) $(LIBS) $(HAVELIBPNG) $(HAVEGDLIB) -lgd -lfreetype -lz sm50b.c || make sm50b.linux.nolibpng
+	gcc -o sm50b $(CFLAGS) $(LIBS) $(HAVELIBPNG) $(HAVEGDLIB) -std=c99 -lgd -lfreetype -lz sm50b.c || make sm50b.linux.nolibpng
 
 sm50b.linux.nolibpng: sm50b.c libpngerror
 	gcc -o sm50b sm50b.c

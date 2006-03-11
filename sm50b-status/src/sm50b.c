@@ -29,8 +29,13 @@
 #include <netdb.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <string.h>
 #include <sys/time.h>
+#include <string.h>
+
+//  math.h round() broken???
+//#define _ISOC99_SOURCE
+//#define _GNU_SOURCE
+#include <math.h>
 
 #ifdef HAVE_LIBPNG
 #include <png.h>
@@ -38,6 +43,7 @@
 #include <gdfonts.h>
 #include <gdfontt.h>
 #endif
+
 
 #define REMOTE_SERVER_PORT 0xaaaa
 #define MAX_MSG 1492
@@ -647,14 +653,15 @@ diag_width=def_diag_width_narrow;
     gdImageLine(image,19,diag_height-(y*12)+14,17,diag_height-(y*12)+14,mark);
     x+=2;
     }
-//marks top and bottom
 
+//marks top and bottom
 
     y=0;
     for (x=0;x<15;x++)
     {
+    
     if(y>1)
-    {
+	{
     //bins 
     sprintf(tonemark,"%2i",
     y*(strcmp(data_STD,"ADSL2 PLUS")?1:2)
@@ -666,7 +673,7 @@ diag_width=def_diag_width_narrow;
         gdImageString(image,gdFontGetSmall(),
                 15+(y*2),diag_height+24,toneptr,mark);
 
-    if(y>226)   {
+    if(y> (strcmp(data_STD,"ADSL2 PLUS")?138:226) )   {
 	//tones
         sprintf(tonemark,"%2i",((y/32)*
 	(strcmp(data_STD,"ADSL2 PLUS")?138:276) 
@@ -682,9 +689,9 @@ diag_width=def_diag_width_narrow;
         gdImageString(image,gdFontGetSmall(),
                 12+(y*2),4,toneptr,mark);
                 }
+	}
 
-
-    }
+	
     if ((y*2)<diag_width)
 	    gdImageLine(image,21+(y*2),diag_height+20,21+(y*2),diag_height+24,mark);
 
@@ -766,6 +773,7 @@ diag_width=def_diag_width_narrow;
 #endif
 
        case 'h':
+
           printf("Firmware Information:\n");
           printf("Bootbase Version : %s\n",   data_BB);
           printf("RAS F/W Version  : %s\n",   data_RAS);
@@ -784,6 +792,15 @@ diag_width=def_diag_width_narrow;
              printf("Bit-rate                  :  %10u  %10u\n", 0, 0);
           if(data_BANDWIDTH_FAST_DOWN+data_BANDWIDTH_FAST_UP!=0)
              printf("Bit-rate  (fast)          :  %10u  %10u\n", data_BANDWIDTH_FAST_DOWN, data_BANDWIDTH_FAST_UP);
+
+ //bandwidth - 14,39%  overhead
+
+          if(data_BANDWIDTH_FAST_DOWN+data_BANDWIDTH_FAST_UP!=0)
+             printf("Bit-rate  (KB/s)             %10u  %10u\n", 
+	     (int)round((float)data_BANDWIDTH_FAST_DOWN*8561/10000/8),
+	     (int)round((float)data_BANDWIDTH_FAST_UP*8561/10000/8)
+	     );
+
           if(data_BANDWIDTH_INTER_DOWN+data_BANDWIDTH_INTER_UP!=0)
              printf("Bit-rate  (interleaved)   :  %10u  %10u\n", data_BANDWIDTH_INTER_DOWN, data_BANDWIDTH_INTER_UP);
           printf("Bit-rate  (relative cap.) :  %8u %%  %8u %%\n", data_LINE_RELLOAD_DOWN, data_LINE_RELLOAD_UP);
