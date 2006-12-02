@@ -1,4 +1,4 @@
-default: copybin
+default: install
 
 tctool.zip: copybin
 	rm -f sm50b.zip
@@ -10,6 +10,9 @@ copybin:
 	make -C src tctool
 	test -f src/tctool && cp src/tctool bin || true
 	test -f src/tctool && cp src/tctool . || true
+
+install:
+	make -C src install
 
 clean:
 	rm -f tctool bin/tctool
