@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tcStreambuf.cpp,v 1.1 2006/12/02 11:53:39 miunske Exp $
+// $Id: tcStreambuf.cpp,v 1.2 2006/12/02 15:59:26 miunske Exp $
 
 #include "tcStreambuf.h"
 
@@ -44,7 +44,7 @@ namespace tc {
 
    void tcStreambuf::initValues() {
       etherStreambuf::initValues();
-      consoleSessionIsOpen=false;
+      macRtsDumpIsRunning=consoleSessionIsOpen=false;
       setTxMode(packetwise);
       setRxMode(stream);
       setRxTimeoutuSec(10000);
@@ -175,20 +175,6 @@ namespace tc {
                discoveries.erase((discoveries.begin()+second));
    }
 
-   void tcStreambuf::sendOpenConsolePacket(const std::string& mac) {
-      std::string data;
-      data.clear(); data.push_back(tcPktType::startConsole);
-      sendPacket(getIfaceMac(), mac, tcFrameType, data);
-   }
-
-   bool tcStreambuf::receiveOpenConsolePacket(const std::string& mac) {
-      etherPacket pkt;
-      int         pktLength;
-      if(getNextPacketOfType(pkt, pktLength, tcPktType::confirmation(tcPktType::startConsole))) {
-         return (unpackMac(pkt.frame.smac)==mac);
-      } else return false;
-   }
-
    const tcStreambuf::discoveryResult& tcStreambuf::setPeer(const discoveryResult& newPeer) {
       if(isConsoleSessionOpen()) closeSession();
 
@@ -233,6 +219,20 @@ namespace tc {
       peer.password=password;
    }
 
+   void tcStreambuf::sendOpenConsolePacket(const std::string& mac) {
+      std::string data;
+      data.clear(); data.push_back(tcPktType::startConsole);
+      sendPacket(getIfaceMac(), mac, tcFrameType, data);
+   }
+
+   bool tcStreambuf::receiveOpenConsolePacket(const std::string& mac) {
+      etherPacket pkt;
+      int         pktLength;
+      if(getNextPacketOfType(pkt, pktLength, tcPktType::confirmation(tcPktType::startConsole))) {
+         return (unpackMac(pkt.frame.smac)==mac);
+      } else return false;
+   }
+
    bool tcStreambuf::openConsoleSession() {
       bool result = false;
       int retriesLeft = maxRetries;
@@ -257,6 +257,47 @@ namespace tc {
       return consoleSessionIsOpen;
    }
 
+   void tcStreambuf::sendStartMacRtsDumpPacket(const std::string& mac) {
+      std::string data;
+      data.clear(); data.push_back(tcPktType::startDump);
+      sendPacket(getIfaceMac(), mac, tcFrameType, data);
+   }
+
+   bool tcStreambuf::receiveStartMacRtsDumpPacket(const std::string& mac) {
+      etherPacket pkt;
+      int         pktLength;
+      if(getNextPacketOfType(pkt, pktLength, tcPktType::confirmation(tcPktType::startDump))) {
+         return (unpackMac(pkt.frame.smac)==mac);
+      } else return false;
+   }
+
+   bool tcStreambuf::startMacRtsDump() {
+      bool result = false;
+      int retriesLeft = maxRetries;
+
+      if(!isMacRtsDumpRunning()) {
+         if(isInterfaceOpen()) {
+            sendStartMacRtsDumpPacket(peer.mac);
+            fetchPackets(timeout, 0);
+            while(retriesLeft>0 && !(result=receiveStartMacRtsDumpPacket(peer.mac))) {
+               --retriesLeft;
+               sendStartMacRtsDumpPacket(peer.mac);
+               fetchPackets(timeout, 0);
+            }
+
+            if(result); // doSomething e.g. setTxDestMac(peer.mac);
+         }
+      } else
+         result=true;
+
+      macRtsDumpIsRunning=result;
+      return result;
+   }
+
+   bool tcStreambuf::isMacRtsDumpRunning() {
+      return macRtsDumpIsRunning;
+   }
+
    void tcStreambuf::sendCloseSessionPacket(const std::string& mac) {
       std::string data;
       data.clear(); data.push_back(tcPktType::stopSession);
@@ -273,7 +314,8 @@ namespace tc {
 
    bool tcStreambuf::closeSession() {
       if(!isInterfaceOpen()) return true;
-      if(!isConsoleSessionOpen()) return true;
+      if(!isConsoleSessionOpen() &&
+         !isMacRtsDumpRunning()) return true;
 
       char buffer[6]; packMac(peer.mac, buffer);
       bool result = false;
@@ -288,7 +330,7 @@ namespace tc {
          fetchPackets(timeout, 0);
       }
 
-      consoleSessionIsOpen=false;
+      macRtsDumpIsRunning=consoleSessionIsOpen=false;
       return result;
    }
 

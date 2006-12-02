@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tcStream.cpp,v 1.1 2006/12/02 11:53:39 miunske Exp $
+// $Id: tcStream.cpp,v 1.2 2006/12/02 15:59:26 miunske Exp $
 
 #include "tcStream.h"
 
@@ -78,6 +78,15 @@ namespace tc {
    bool tcStream::isConsoleSessionOpen() {
       return static_cast<tcStreambuf*>(rdbuf())->isConsoleSessionOpen();
    }
+
+   bool tcStream::startMacRtsDump() {
+      return static_cast<tcStreambuf*>(rdbuf())->startMacRtsDump();
+   }
+
+   bool tcStream::isMacRtsDumpRunning() {
+      return static_cast<tcStreambuf*>(rdbuf())->isMacRtsDumpRunning();
+   }
+
 
    bool tcStream::closeSession() {
       return static_cast<tcStreambuf*>(rdbuf())->closeSession();

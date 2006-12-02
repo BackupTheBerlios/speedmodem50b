@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tcStream.h,v 1.1 2006/12/02 11:53:39 miunske Exp $
+// $Id: tcStream.h,v 1.2 2006/12/02 15:59:26 miunske Exp $
 
 #ifndef _TCSTREAM_h_included_
 #define _TCSTREAM_h_included_
@@ -64,6 +64,8 @@ namespace tc {
          void setPeerPassword(const std::string& password);
          bool openConsoleSession();
          bool isConsoleSessionOpen();
+         bool startMacRtsDump();
+         bool isMacRtsDumpRunning();
          bool closeSession();
          bool login(const std::string& password = std::string());
          bool isLoggedIn();

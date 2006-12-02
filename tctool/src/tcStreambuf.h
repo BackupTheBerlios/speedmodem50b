@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tcStreambuf.h,v 1.1 2006/12/02 11:53:39 miunske Exp $
+// $Id: tcStreambuf.h,v 1.2 2006/12/02 15:59:26 miunske Exp $
 
 #ifndef _TCSTREAMBUF_h_included_
 #define _TCSTREAMBUF_h_included_
@@ -256,6 +256,7 @@ namespace tc {
          int maxRetries;
          discoveryResult peer;
          bool consoleSessionIsOpen;
+         bool macRtsDumpIsRunning;
          tcStatus peerStatus;
 
       public:
@@ -273,6 +274,8 @@ namespace tc {
          void setPeerPassword(const std::string& password);
          bool openConsoleSession();
          bool isConsoleSessionOpen();
+         bool startMacRtsDump();
+         bool isMacRtsDumpRunning();
          bool closeSession();
          bool login(const std::string& password = std::string());
          bool isLoggedIn();
@@ -298,6 +301,8 @@ namespace tc {
          int  peekNextDataPacketSize();
          void sendOpenConsolePacket(const std::string& mac);
          bool receiveOpenConsolePacket(const std::string& mac);
+         void sendStartMacRtsDumpPacket(const std::string& mac);
+         bool receiveStartMacRtsDumpPacket(const std::string& mac);
          void sendCloseSessionPacket(const std::string& mac);
          bool receiveCloseSessionPacket(const std::string& mac);
          int showmanyc();

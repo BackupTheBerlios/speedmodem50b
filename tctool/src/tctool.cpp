@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tctool.cpp,v 1.2 2006/12/02 15:14:22 miunske Exp $
+// $Id: tctool.cpp,v 1.3 2006/12/02 15:59:26 miunske Exp $
 
 #define BUFFERSIZE 8192
 
@@ -55,15 +55,18 @@ void printHelp(char *binary) {
    fprintf(stderr, "   -s      : retrieves the udp-status from the modem and displays it.\n");
    fprintf(stderr, "   -S      : same a above, but script-readable.\n");
    fprintf(stderr, "   -C      : connects to the modem for a console-session.\n");
-//   fprintf(stderr, "   -R      : enables the real-time-staus dump via ethernet.\n");
+   fprintf(stderr, "   -R      : enables the real-time-status dump via ethernet.\n");
    fprintf(stderr, "   -c cmd  : executes a command in a console-session. password required.\n");
-   fprintf(stderr, "   -h      : displays this cruft.\n");
+   fprintf(stderr, "   -h      : displays this cruft.\n\n");
 }
 
 int errorMsg(char *binary, int error) {
    if(error!=0) fprintf(stderr, "%s: ", binary);
    switch(error) {
       case 0:
+         break;
+      case -1:
+         fprintf(stderr, "not yet implemented. try again later. ;-)\n");
          break;
       case 1:
          fprintf(stderr, "no action given. try -h.\n");
@@ -106,6 +109,9 @@ int errorMsg(char *binary, int error) {
          break;
       case 14:
          fprintf(stderr, "cannot execute command.\n");
+         break;
+      case 15:
+         fprintf(stderr, "cannot start MAC RTS-Dump.\n");
          break;
       default:
          fprintf(stderr, "unknown error %u.\n", error);
@@ -434,6 +440,20 @@ int executeCommand(char* command) {
    return result;
 }
 
+int startMacRtsDump() {
+   int openDevResult = 0;
+   if((openDevResult=setTcDev())>0) return openDevResult;
+
+   int result = 0;
+   if(tcDev.startMacRtsDump()) {
+      sleep(5);
+   } else
+      result=15;
+
+   tcDev.closeSession();
+   return result;
+}
+
 int main(int argc, char** argv) {
    int optResult = 1;
    int mainResult = 1;
@@ -472,6 +492,9 @@ int main(int argc, char** argv) {
             break;
          case 'c':   // executeCommand
             if((mainResult=executeCommand(optarg))>0) return errorMsg(argv[0], mainResult);
+            break;
+         case 'R':   // startMacRtsDump
+            return errorMsg(argv[0], startMacRtsDump());
             break;
          case 's':   // getStatusHumanReadable
             return errorMsg(argv[0], getStatus(false));

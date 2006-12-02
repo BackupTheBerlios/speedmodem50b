@@ -23,7 +23,7 @@
 #   LIC: GPL                                                              *
 #                                                                         *
 #**************************************************************************
-# $Id: Makefile,v 1.1 2006/12/02 11:53:39 miunske Exp $
+# $Id: Makefile,v 1.2 2006/12/02 15:59:26 miunske Exp $
 
 DESTDIR  := /usr/local/bin/
 MAIN     := tctool
@@ -114,6 +114,5 @@ edit: objclean
 	tcStreambuf.cpp \
 	>/dev/null 2>&1 &
 
-backup: clean
-	scp -r ../src root@ralf-laptop:tctool
-
+backup: distclean
+	cvs ci -m "automatic commitment"
