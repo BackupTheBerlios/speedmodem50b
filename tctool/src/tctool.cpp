@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tctool.cpp,v 1.1 2006/12/02 11:53:39 miunske Exp $
+// $Id: tctool.cpp,v 1.2 2006/12/02 15:14:22 miunske Exp $
 
 #define BUFFERSIZE 8192
 
@@ -33,7 +33,7 @@
 #include <string.h>
 #include <unistd.h>
 
-std::string                      options = "I:m:i:r:t:p:c:MUdsSCh";
+std::string                      options = "I:m:i:r:t:p:c:MUdsSCRh";
 std::string                      ethDev  = "eth0";
 tc::tcStreambuf::discoveryResult target;
 std::string                      targetPassword;
@@ -41,7 +41,7 @@ tc::tcStream                     tcDev;
 
 void printHelp(char *binary) {
    fprintf(stderr, "\ntcTool\n\n");
-   fprintf(stderr, "usage: %s {-(I dev|m mac|i ip|r retr|t time|c cmd)} -(M|U|d|s|S|c|h)\n", binary);
+   fprintf(stderr, "usage: %s {-(I dev|m mac|i ip|r retr|t time|c cmd)} -(M|U|d|s|S|C|R|h)\n", binary);
    fprintf(stderr, "where:\n");
    fprintf(stderr, "   -I dev  : sets the iface for direct mac-communication via 'dev'\n");
    fprintf(stderr, "   -m mac  : sets the target-mac of the modem for console-communication.\n");
@@ -55,6 +55,7 @@ void printHelp(char *binary) {
    fprintf(stderr, "   -s      : retrieves the udp-status from the modem and displays it.\n");
    fprintf(stderr, "   -S      : same a above, but script-readable.\n");
    fprintf(stderr, "   -C      : connects to the modem for a console-session.\n");
+//   fprintf(stderr, "   -R      : enables the real-time-staus dump via ethernet.\n");
    fprintf(stderr, "   -c cmd  : executes a command in a console-session. password required.\n");
    fprintf(stderr, "   -h      : displays this cruft.\n");
 }
@@ -65,7 +66,7 @@ int errorMsg(char *binary, int error) {
       case 0:
          break;
       case 1:
-         fprintf(stderr, "no action given.\n");
+         fprintf(stderr, "no action given. try -h.\n");
          break;
       case 2:
          fprintf(stderr, "cannot open interface %s.\n", ethDev.c_str());
