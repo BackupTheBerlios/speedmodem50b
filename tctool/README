@@ -1,0 +1,21 @@
+
+  Tr*ndCh*p-Modem-Utility for Linux and BSD
+  =========================================
+
+
+tcTool provides access to the console-service of Tr*ndCh*p-based ADSL-Modems.
+for further details see "tctool -h"
+
+
+  LICENSE
+  =======
+
+tcTool is provided "as is" without the guarantee of fitness for any purpose.
+It is distributed unter se terms of GNU-GPLv2 or later. See "COPYING".
+
+
+  ACKNOWLEDGES
+  ============
+
+tcTool uses some code from Roaring Penguin's RP-PPPOE for direct mac-communication.
+Great thanks to those people.

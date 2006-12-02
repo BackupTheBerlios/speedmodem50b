@@ -1,8 +1,11 @@
-default: install
+FILELIST := tctool tctool/doc tctool/doc/.keepme tctool/src tctool/src/Doxyfile tctool/src/Makefile tctool/src/config.h tctool/src/config.h.linux26 tctool/src/etherStream.cpp tctool/src/etherStream.h tctool/src/etherStreambuf.cpp tctool/src/etherStreambuf.h tctool/src/example.cpp tctool/src/if.c tctool/src/if.h tctool/src/interface.cpp tctool/src/interface.h tctool/src/pppoe.h tctool/src/tcStream.cpp tctool/src/tcStream.h tctool/src/tcStreambuf.cpp tctool/src/tcStreambuf.h tctool/src/tctool.cpp tctool/Makefile tctool/COPYING tctool/README tctool/misc tctool/misc/cgi tctool/misc/cgi/tc.cgi tctool/bin tctool/bin/tctool tctool/bin/.keepme tctool/tctool
+
+default: tctool.zip
 
 tctool.zip: copybin
 	rm -f sm50b.zip
-	cd .. && zip -9 sm50b-status/sm50b.zip sm50b-status sm50b-status/src sm50b-status/Makefile sm50b-status/src/COPYING sm50b-status/src/Makefile sm50b-status/src/sm50b.c sm50b-status/cygwin*.dll sm50b-status/sm50b sm50b-status/sm50b.exe sm50b-status/misc sm50b-status/misc/cgi sm50b-status/misc/cgi/sm50b.cgi || true
+	make -C src distclean
+	cd .. && zip -9 tctool/tctool.zip $(FILELIST) || true
 	rm -f cygwin*.dll || true
 	make -C src clean
 
@@ -15,5 +18,6 @@ install:
 	make -C src install
 
 clean:
-	rm -f tctool bin/tctool
+	rm -f tctool.zip tctool bin/tctool
 	make -C src clean
+
