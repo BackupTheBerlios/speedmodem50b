@@ -23,12 +23,12 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: etherStream.cpp,v 1.1 2006/12/02 11:53:39 miunske Exp $
+// $Id: etherStream.cpp,v 1.2 2006/12/04 16:33:55 miunske Exp $
 
 #include "etherStream.h"
 
 namespace tc {
-   etherStream::etherStream() :std::iostream() {
+   etherStream::etherStream() :std::iostream(static_cast<etherStreambuf*>(NULL)) {
       etherStreambuf* buf = static_cast<etherStreambuf*>(rdbuf());
       if(buf!=NULL) delete buf;
       buf=new etherStreambuf();
