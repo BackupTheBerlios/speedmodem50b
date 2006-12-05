@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tcStreambuf.cpp,v 1.2 2006/12/02 15:59:26 miunske Exp $
+// $Id: tcStreambuf.cpp,v 1.3 2006/12/05 09:39:23 miunske Exp $
 
 #include "tcStreambuf.h"
 
@@ -596,7 +596,7 @@ namespace tc {
       return result;
    }
 
-   int tcStreambuf::showmanyc() {
+   std::streamsize tcStreambuf::showmanyc() {
       int bytesAvail;
       fetchPackets(0, 0);
       bytesRequested=0;

@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tcStreambuf.h,v 1.2 2006/12/02 15:59:26 miunske Exp $
+// $Id: tcStreambuf.h,v 1.3 2006/12/05 09:39:23 miunske Exp $
 
 #ifndef _TCSTREAMBUF_h_included_
 #define _TCSTREAMBUF_h_included_
@@ -262,9 +262,9 @@ namespace tc {
       public:
          tcStreambuf();
          bool openInterface(const std::string& iface);
-         void closeInterface();
+         virtual void closeInterface();
          void setMaxRetries(int retries);
-         bool sendRawPacket(etherPacket& pkt, int pktLength);
+         virtual bool sendRawPacket(etherPacket& pkt, int pktLength);
          const std::vector<tcStreambuf::discoveryResult>& macDiscover();
          const std::vector<tcStreambuf::discoveryResult>& udpDiscover(const std::string& ip = std::string());
          const std::vector<discoveryResult>& discover();
@@ -286,8 +286,8 @@ namespace tc {
          const tcStatus& getPeerStatus();
 
       protected:
-         void initValues();
-         bool receiveRawPacket(etherPacket& pkt, int& pktLength);
+         virtual void initValues();
+         virtual bool receiveRawPacket(etherPacket& pkt, int& pktLength);
          void sendDiscoveryPacket();
          bool receiveDiscoveryPacket(std::string& mac, std::string& ip);
          void unique(std::vector<discoveryResult> &discoveries);
@@ -297,15 +297,15 @@ namespace tc {
                               std::vector<int>::iterator& sizeIt, int pktType);
          bool getNextPacketOfType(etherPacket& pkt, int& pktLength, int pktType);
          int  peekNextPacketOfTypeSize(int pktType);
-         bool getNextDataPacket(etherPacket& pkt, int& pktLength);
-         int  peekNextDataPacketSize();
+         virtual bool getNextDataPacket(etherPacket& pkt, int& pktLength);
+         virtual int  peekNextDataPacketSize();
          void sendOpenConsolePacket(const std::string& mac);
          bool receiveOpenConsolePacket(const std::string& mac);
          void sendStartMacRtsDumpPacket(const std::string& mac);
          bool receiveStartMacRtsDumpPacket(const std::string& mac);
          void sendCloseSessionPacket(const std::string& mac);
          bool receiveCloseSessionPacket(const std::string& mac);
-         int showmanyc();
+         virtual std::streamsize showmanyc();
          void byteFix(tcStatusPacket &status);
          std::string trim(const std::string& str);
    };

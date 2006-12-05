@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: etherStreambuf.cpp,v 1.1 2006/12/02 11:53:39 miunske Exp $
+// $Id: etherStreambuf.cpp,v 1.2 2006/12/05 09:39:23 miunske Exp $
 
 #include "etherStreambuf.h"
 
@@ -461,7 +461,7 @@ namespace tc {
       }
    }
 
-   int etherStreambuf::showmanyc() {
+   std::streamsize etherStreambuf::showmanyc() {
       int bytesAvail;
       fetchPackets(0, 0);
       bytesRequested=0;

@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: etherStreambuf.h,v 1.1 2006/12/02 11:53:39 miunske Exp $
+// $Id: etherStreambuf.h,v 1.2 2006/12/05 09:39:23 miunske Exp $
 
 #ifndef _ETHERSTREAMBUF_h_included_
 #define _ETHERSTREAMBUF_h_included_
@@ -154,7 +154,7 @@ namespace tc {
 
          std::streamsize xsgetn(char_type *s,
                                 std::streamsize n);
-         virtual int showmanyc();
+         virtual std::streamsize showmanyc();
          int_type underflow();
          void flush();
    };
