@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tcStreambuf.cpp,v 1.3 2006/12/05 09:39:23 miunske Exp $
+// $Id: tcStreambuf.cpp,v 1.4 2006/12/06 17:41:54 miunske Exp $
 
 #include "tcStreambuf.h"
 
@@ -867,6 +867,38 @@ namespace tc {
 
    int tcStreambuf::tcStatus::getBandwidthUpFastpath() const {
       return int(0xffff & status.bandwidthUpFastpath);
+   }
+
+   int tcStreambuf::tcStatus::getNettoBandwidthDown() const {
+      return getNettoBandwidthDownInterleaved()+getNettoBandwidthDownFastpath();
+   }
+
+   int tcStreambuf::tcStatus::getNettoBandwidthUp() const {
+      return getNettoBandwidthUpInterleaved()+getNettoBandwidthUpFastpath();
+   }
+
+   int tcStreambuf::tcStatus::getNettoBandwidthDownMax() const {
+      return getLineRelativeLoadDown()>0?(int)(100.0f*static_cast<float>(getNettoBandwidthDown())/static_cast<float>(getLineRelativeLoadDown())):0;
+   }
+
+   int tcStreambuf::tcStatus::getNettoBandwidthUpMax() const {
+      return getLineRelativeLoadUp()>0?(int)(100.0f*static_cast<float>(getNettoBandwidthUp())/static_cast<float>(getLineRelativeLoadUp())):0;
+   }
+
+   int tcStreambuf::tcStatus::getNettoBandwidthDownInterleaved() const {
+      return static_cast<int>(static_cast<double>(getBandwidthDownInterleaved())-(protocolOverhead*static_cast<double>(getBandwidthDownInterleaved()))+0.5);
+   }
+
+   int tcStreambuf::tcStatus::getNettoBandwidthDownFastpath() const {
+      return static_cast<int>(static_cast<double>(getBandwidthDownFastpath())-(protocolOverhead*static_cast<double>(getBandwidthDownFastpath()))+0.5);
+   }
+
+   int tcStreambuf::tcStatus::getNettoBandwidthUpInterleaved() const {
+      return static_cast<int>(static_cast<double>(getBandwidthUpInterleaved())-(protocolOverhead*static_cast<double>(getBandwidthUpInterleaved()))+0.5);
+   }
+
+   int tcStreambuf::tcStatus::getNettoBandwidthUpFastpath() const {
+      return static_cast<int>(static_cast<double>(getBandwidthUpFastpath())-(protocolOverhead*static_cast<double>(getBandwidthUpFastpath()))+0.5);
    }
 
    int tcStreambuf::tcStatus::getUnknown0x150() const {

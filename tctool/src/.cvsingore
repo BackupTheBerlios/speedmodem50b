@@ -1,0 +1,4 @@
+tctool
+tctool.static
+lib*.a
+*.o

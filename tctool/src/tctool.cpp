@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tctool.cpp,v 1.3 2006/12/02 15:59:26 miunske Exp $
+// $Id: tctool.cpp,v 1.4 2006/12/06 17:41:54 miunske Exp $
 
 #define BUFFERSIZE 8192
 
@@ -230,6 +230,14 @@ void printStatusHumanReadable(const tc::tcStreambuf::tcStatus& status, int idx, 
       printf("Bit-rate  (interleaved)   :  %10u  %10u\n", status.getBandwidthDownInterleaved(), status.getBandwidthUpInterleaved());
    printf("Bit-rate  (relative cap.) :  %8u %%  %8u %%\n", status.getLineRelativeLoadDown(), status.getLineRelativeLoadUp());
    printf("Bit-rate  (max)           :  %10u  %10u\n", status.getBandwidthDownMax(), status.getBandwidthUpMax());
+
+   if(!(status.isFastpath()||status.isInterleaved()))
+      printf("Data-rate                 :  %10u  %10u\n", 0, 0);
+   if(status.isFastpath())
+      printf("Data-rate (fast)          :  %10u  %10u\n", status.getNettoBandwidthDownFastpath(), status.getNettoBandwidthUpFastpath());
+   if(status.isInterleaved())
+      printf("Data-rate (interleaved)   :  %10u  %10u\n", status.getNettoBandwidthDownInterleaved(), status.getNettoBandwidthUpInterleaved());
+
    if(!(status.isFastpath()||status.isInterleaved())) {
       printf("FEC error                 :  %10u  %10u\n", 0,0);
       printf("CRC error                 :  %10u  %10u\n", 0, 0);

@@ -23,7 +23,7 @@
 #   LIC: GPL                                                              *
 #                                                                         *
 #**************************************************************************
-# $Id: Makefile,v 1.3 2006/12/06 15:57:54 miunske Exp $
+# $Id: Makefile,v 1.4 2006/12/06 17:41:54 miunske Exp $
 
 DESTDIR  := /usr/local/bin/
 MAIN     := tctool
@@ -31,15 +31,16 @@ MAINOBJ  := if.o interface.o etherStream.o etherStreambuf.o tcStream.o tcStreamb
 EXAMPLE  := example
 EXOBJ    := if.o interface.o etherStream.o etherStreambuf.o tcStream.o tcStreambuf.o
 
-CXX      := g++
-CXXFLAGS := -march=i386 -O2
-LDFLAGS  := --strip-unneeded
-LIBS     := 
-LDSTATIC := -L. # -static
-COUNTRY  := "C"
-LANG     := "C"
-LANGUAGE := "C"
-LC_ALL   := "C"
+CXX        := g++
+CXXFLAGS   := -march=i386 -O2
+LDFLAGS    := --strip-unneeded
+LIBS       := 
+LDSTATIC   := -L. -static-libgcc
+STATICLIBS := stdc++ m
+COUNTRY    := "C"
+LANG       := "C"
+LANGUAGE   := "C"
+LC_ALL     := "C"
 
 default: install
 
@@ -48,7 +49,11 @@ test: $(EXAMPLE)
 
 all: $(MAIN) $(EXAMPLE) objclean docs
 
-install: $(MAIN)
+install: $(MAIN) installbinary
+
+install.static: static installbinary
+
+installbinary:
 	install -s -p -o root -g root -m 4755 $(MAIN) $(DESTDIR)
 
 uninstall: $(MAIN)
@@ -57,10 +62,14 @@ uninstall: $(MAIN)
 $(MAIN): $(MAIN).o $(MAINOBJ)
 	$(CXX) $(LDFLAGS) -o $@ $(LIBS) $^
 
+static: staticlibs $(MAIN).static
+	mv $(MAIN).static $(MAIN)
+
+staticlibs:
+	for LIB in $(STATICLIBS); do ln -sfv `$(CXX) -print-file-name=lib$${LIB}.a`; done
+
 $(MAIN).static: $(MAIN).o $(MAINOBJ)
-	ln -sf $(shell $(CXX) -print-file-name=libstdc++.a )
 	$(CXX) $(LDSTATIC) $(LDFLAGS) -o $@ $(LIBS) $^
-	rm -f libstdc++.a
 
 $(EXAMPLE): $(EXAMPLE).o $(EXOBJ)
 	$(CXX) $(LDFLAGS) -o $@ $(LIBS) $^
@@ -94,8 +103,11 @@ realclean: clean
 clean: docsclean objclean
 	rm -rfv $(MAIN) $(MAIN).static $(EXAMPLE) autom4te.cache config.status config.log install-sh
 
-objclean:
+objclean: libsclean
 	rm -fv *~ *.o
+
+libsclean:
+	for LIB in $(STATICLIBS); do rm -fv "lib$${LIB}.a"; done
 
 docsclean:
 	rm -rf ../doc/*

@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tcStreambuf.h,v 1.3 2006/12/05 09:39:23 miunske Exp $
+// $Id: tcStreambuf.h,v 1.4 2006/12/06 17:41:54 miunske Exp $
 
 #ifndef _TCSTREAMBUF_h_included_
 #define _TCSTREAMBUF_h_included_
@@ -181,6 +181,8 @@ namespace tc {
                static const unsigned int lineStatusWaiting      = 0x0800;
                static const unsigned int lineStatusInitializing = 0x1000;
                static const unsigned int lineStatusUp           = 0x2006;
+               static const double       protocolOverhead       = 0.1439;
+
             protected:
                tcStatusPacket status;
                bool           valid;
@@ -210,6 +212,14 @@ namespace tc {
                int         getBandwidthDownFastpath() const;
                int         getBandwidthUpInterleaved() const;
                int         getBandwidthUpFastpath() const;
+               int         getNettoBandwidthDown() const;
+               int         getNettoBandwidthUp() const;
+               int         getNettoBandwidthDownMax() const;
+               int         getNettoBandwidthUpMax() const;
+               int         getNettoBandwidthDownInterleaved() const;
+               int         getNettoBandwidthDownFastpath() const;
+               int         getNettoBandwidthUpInterleaved() const;
+               int         getNettoBandwidthUpFastpath() const;
                int         getUnknown0x150() const;
                int         getUnknown0x152() const;
                int         getLineErrorsFecDownFastpath() const;
