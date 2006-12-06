@@ -23,7 +23,7 @@
 #   LIC: GPL                                                              *
 #                                                                         *
 #**************************************************************************
-# $Id: Makefile,v 1.2 2006/12/02 15:59:26 miunske Exp $
+# $Id: Makefile,v 1.3 2006/12/06 15:57:54 miunske Exp $
 
 DESTDIR  := /usr/local/bin/
 MAIN     := tctool
@@ -35,7 +35,7 @@ CXX      := g++
 CXXFLAGS := -march=i386 -O2
 LDFLAGS  := --strip-unneeded
 LIBS     := 
-LDSTATIC := -static 
+LDSTATIC := -L. # -static
 COUNTRY  := "C"
 LANG     := "C"
 LANGUAGE := "C"
@@ -58,7 +58,9 @@ $(MAIN): $(MAIN).o $(MAINOBJ)
 	$(CXX) $(LDFLAGS) -o $@ $(LIBS) $^
 
 $(MAIN).static: $(MAIN).o $(MAINOBJ)
+	ln -sf $(shell $(CXX) -print-file-name=libstdc++.a )
 	$(CXX) $(LDSTATIC) $(LDFLAGS) -o $@ $(LIBS) $^
+	rm -f libstdc++.a
 
 $(EXAMPLE): $(EXAMPLE).o $(EXOBJ)
 	$(CXX) $(LDFLAGS) -o $@ $(LIBS) $^
