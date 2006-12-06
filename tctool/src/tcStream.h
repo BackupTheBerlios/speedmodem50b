@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2005 by Ralf Miunske                                    *
- *   miunske at users.sourceforge.net                                      *
+ *   miunske at users.berlios.de                                           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tcStream.h,v 1.2 2006/12/02 15:59:26 miunske Exp $
+// $Id: tcStream.h,v 1.3 2006/12/06 17:48:25 miunske Exp $
 
 #ifndef _TCSTREAM_h_included_
 #define _TCSTREAM_h_included_
@@ -46,7 +46,7 @@ namespace tc {
     * @see etherStream
     * @see etherStreambuf
     *
-    * @author Ralf Miunske <miunske at users.sourceforge.net>
+    * @author Ralf Miunske <miunske at users.berlios.de>
     *
     * $Header $
     */

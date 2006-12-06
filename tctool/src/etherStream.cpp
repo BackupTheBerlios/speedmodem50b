@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2005 by Ralf Miunske                                    *
- *   miunske at users.sourceforge.net                                      *
+ *   miunske at users.berlios.de                                           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: etherStream.cpp,v 1.2 2006/12/04 16:33:55 miunske Exp $
+// $Id: etherStream.cpp,v 1.3 2006/12/06 17:48:25 miunske Exp $
 
 #include "etherStream.h"
 

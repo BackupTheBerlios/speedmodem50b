@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2005 by Ralf Miunske                                    *
- *   miunske at users.sourceforge.net                                      *
+ *   miunske at users.berlios.de                                           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tcStreambuf.h,v 1.4 2006/12/06 17:41:54 miunske Exp $
+// $Id: tcStreambuf.h,v 1.5 2006/12/06 17:48:25 miunske Exp $
 
 #ifndef _TCSTREAMBUF_h_included_
 #define _TCSTREAMBUF_h_included_
@@ -104,7 +104,7 @@ namespace tc {
     * @see etherStream
     * @see etherStreambuf
     *
-    * @author Ralf Miunske <miunske at users.sourceforge.net>
+    * @author Ralf Miunske <miunske at users.berlios.de>
     *
     * $Header $
     */
@@ -122,7 +122,7 @@ namespace tc {
           *
           * @see tcStreambuf
           *
-          * @author Ralf Miunske <miunske at users.sourceforge.net>
+          * @author Ralf Miunske <miunske at users.berlios.de>
           *
           * $Header $
           */
@@ -149,7 +149,7 @@ namespace tc {
           * @see tcStream
           * @see tcStreambuf
           *
-          * @author Ralf Miunske <miunske at users.sourceforge.net>
+          * @author Ralf Miunske <miunske at users.berlios.de>
           *
           * $Header $
           */
@@ -171,7 +171,7 @@ namespace tc {
           * @see tcStream
           * @see tcStreambuf
           *
-          * @author Ralf Miunske <miunske at users.sourceforge.net>
+          * @author Ralf Miunske <miunske at users.berlios.de>
           *
           * $Header $
           */
