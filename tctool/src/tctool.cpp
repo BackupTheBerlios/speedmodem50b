@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tctool.cpp,v 1.6 2006/12/07 03:24:53 miunske Exp $
+// $Id: tctool.cpp,v 1.7 2006/12/07 14:53:47 miunske Exp $
 
 #define BUFFERSIZE 8192
 
@@ -32,12 +32,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
 
 std::string                      options = "I:m:i:r:t:p:c:MUdsSCRh";
 std::string                      ethDev  = "eth0";
 tc::tcStreambuf::discoveryResult target;
 std::string                      targetPassword;
 tc::tcStream                     tcDev;
+tc::tcRtsDump*                   tcDump;
+char                             *binary;
 
 void printHelp(char *binary) {
    fprintf(stderr, "\ntcTool\n\n");
@@ -63,10 +66,31 @@ void printHelp(char *binary) {
 int errorMsg(char *binary, int error) {
    if(error!=0) fprintf(stderr, "%s: ", binary);
    switch(error) {
-      case 0:
+      case -SIGHUP:
+         fprintf(stderr, "caught SIGHUP. terminating cleanly.\n");
          break;
-      case -1:
-         fprintf(stderr, "not yet implemented. try again later. ;-)\n");
+      case -SIGINT:
+         fprintf(stderr, "caught SIGINT. terminating cleanly.\n");
+         break;
+      case -SIGQUIT:
+         fprintf(stderr, "caught SIGQUIT. terminating cleanly.\n");
+         break;
+      case -SIGABRT:
+         fprintf(stderr, "caught SIGABRT. terminating cleanly.\n");
+         break;
+      case -SIGTERM:
+         fprintf(stderr, "caught SIGTERM. terminating cleanly.\n");
+         break;
+      case -SIGTSTP:
+         fprintf(stderr, "caught SIGTSTP. terminating cleanly.\n");
+         break;
+      case -SIGUSR1:
+         fprintf(stderr, "caught SIGUSR1. terminating cleanly.\n");
+         break;
+      case -SIGUSR2:
+         fprintf(stderr, "caught SIGUSR2. terminating cleanly.\n");
+         break;
+      case 0:
          break;
       case 1:
          fprintf(stderr, "no action given. try -h.\n");
@@ -117,8 +141,36 @@ int errorMsg(char *binary, int error) {
          fprintf(stderr, "unknown error %u.\n", error);
          break;
    }
+
+   if(tcDev.isInterfaceOpen() && (tcDev.isConsoleSessionOpen() || tcDev.isMacRtsDumpRunning())) {
+      if(tcDev.isConsoleSessionOpen() && tcDev.isLoggedIn()) tcDev.logout();
+      tcDev.closeSession(tcDump);
+   }
+
    tcDev.closeInterface();
    return error;
+}
+
+void signalHandler(int sig) {
+   exit(errorMsg(binary, -sig));
+}
+
+void installSignalHandler(char* argv0) {
+   binary=argv0;
+   sigset_t mask;
+   struct sigaction action;
+   sigemptyset( &mask );
+   action.sa_mask = mask;
+   action.sa_flags = SA_NODEFER;
+   action.sa_handler = signalHandler;
+   sigaction(SIGHUP , &action, NULL);
+   sigaction(SIGINT , &action, NULL);
+   sigaction(SIGQUIT, &action, NULL);
+   sigaction(SIGABRT, &action, NULL);
+   sigaction(SIGTERM, &action, NULL);
+   sigaction(SIGTSTP, &action, NULL);
+   sigaction(SIGUSR1, &action, NULL);
+   sigaction(SIGUSR2, &action, NULL);
 }
 
 int setInterface(char* interface) {
@@ -453,10 +505,10 @@ int startMacRtsDump() {
    if((openDevResult=setTcDev())>0) return openDevResult;
 
    int result = 0;
-   tc::tcRtsDump* tcDump = tcDev.startMacRtsDump();
+   tcDump = tcDev.startMacRtsDump();
    if(tcDump!=NULL) {
       sleep(1);
-      for(int i=0; i<50 && tcDump->doSomething(); ++i) sleep(1);
+      for(int i=0; i<50 && tcDump->doSomething(); ++i);
    } else
       result=15;
 
@@ -465,6 +517,7 @@ int startMacRtsDump() {
 }
 
 int main(int argc, char** argv) {
+   installSignalHandler(argv[0]);
    int optResult = 1;
    int mainResult = 1;
    int option;

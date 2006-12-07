@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tcRtsDumpbuf.cpp,v 1.1 2006/12/07 03:25:28 miunske Exp $
+// $Id: tcRtsDumpbuf.cpp,v 1.2 2006/12/07 14:53:47 miunske Exp $
 
 #include "tcRtsDumpbuf.h"
 
@@ -38,8 +38,8 @@ namespace tc {
       etherStreambuf::initValues();
       setTxMode(packetwise);
       setRxMode(packetwise);
-      setRxTimeoutuSec(10000);
-      setRxCollectTimeoutuSec(10000);
+      setRxTimeoutuSec(1100000);
+      setRxCollectTimeoutuSec(0);
       setTxFrameType(tcFrameType);
       peerMac=std::string();
       rtsData=std::string();
@@ -56,28 +56,44 @@ namespace tc {
       bool result = false;
       while(getNextRtsFrame(frame)) {
          result=true;
-         if(true || abs((frame.bRaw[10]&0xff)-96)<2) {
-         for(int adr=0; adr<sizeof(frame); ++adr) {
-            printf(" %02x",frame.bRaw[adr]&0xff);
-         }
-         printf("\n");}
+         printf(" %04x",ntohs(frame.wRaw[0]&0xffff));
+         printf(" %04x",ntohs(frame.wRaw[1]&0xffff));
+         printf(" %04x",ntohs(frame.wRaw[2]&0xffff));
+         printf(" %04x",ntohs(frame.wRaw[3]&0xffff));
+         printf(" %04x",ntohs(frame.wRaw[4]&0xffff));
+         printf(" %3u",frame.bRaw[10]&0xff);
+         printf(" %3u",frame.bRaw[11]&0xff);
+         printf(" %04x",ntohs(frame.wRaw[6]&0xffff));
+         printf(" %04x",ntohs(frame.wRaw[7]&0xffff));
+         printf(" %04x",ntohs(frame.wRaw[8]&0xffff));
+         printf(" %04x",ntohs(frame.wRaw[9]&0xffff));
+         printf(" %04x",ntohs(frame.wRaw[10]&0xffff));
+         printf(" %04x",ntohs(frame.wRaw[11]&0xffff));
+         printf(" %04x",ntohs(frame.wRaw[12]&0xffff));
+         printf(" %04x",ntohs(frame.wRaw[13]&0xffff));
+         printf(" %04x",ntohs(frame.wRaw[14]&0xffff));
+         printf(" %04x",ntohs(frame.wRaw[15]&0xffff));
+         printf("\n");
       }
       return result;
    }
 
    bool tcRtsDumpbuf::getNextRtsFrame(tcRtsFrame& frame) {
-      collectPackets();
-      if(rtsData.size()<sizeof(frame)) return false;
+      collectPackets(0, 0);
+      if(rtsData.size()<sizeof(frame)) {
+         collectPackets(timeout, collectTimeout);
+         if(rtsData.size()<sizeof(frame)) return false;
+      }
       memcpy(frame.bRaw, rtsData.c_str(), sizeof(frame));
       rtsData.erase(rtsData.begin(), rtsData.begin()+sizeof(frame));
       //byteFix(frame);
       return true;
    }
 
-   void tcRtsDumpbuf::collectPackets() {
+   void tcRtsDumpbuf::collectPackets(int timeout, int collectTimeout) {
       tcRtsPacket pkt;
       int         pktLength;
-      fetchPackets(0, 0);
+      fetchPackets(timeout, collectTimeout);
       while(getNextRtsPacket(pkt, pktLength))
          for(int adr=0; adr<pkt.frame.size; ++adr)
             rtsData.push_back(pkt.frame.data[adr]);

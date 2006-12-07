@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tcRtsDumpbuf.h,v 1.1 2006/12/07 03:25:28 miunske Exp $
+// $Id: tcRtsDumpbuf.h,v 1.2 2006/12/07 14:53:47 miunske Exp $
 
 #ifndef _TCRTSDUMPBUF_h_included_
 #define _TCRTSDUMPBUF_h_included_
@@ -90,7 +90,7 @@ namespace tc {
          bool openInterface(const std::string& iface);
          virtual void closeInterface();
          bool getNextRtsFrame(tcRtsFrame& frame);
-         void collectPackets();
+         void collectPackets(int timeout, int collectTimeout);
          virtual bool sendRawPacket(etherPacket& pkt, int pktLength);
          virtual bool receiveRawPacket(etherPacket& pkt, int& pktLength);
          bool getNextPacketIt(std::vector<etherPacket>::iterator& pktIt,
