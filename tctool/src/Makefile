@@ -23,13 +23,13 @@
 #   LIC: GPL                                                              *
 #                                                                         *
 #**************************************************************************
-# $Id: Makefile,v 1.5 2006/12/06 17:48:25 miunske Exp $
+# $Id: Makefile,v 1.6 2006/12/07 03:24:53 miunske Exp $
 
 DESTDIR  := /usr/local/bin/
 MAIN     := tctool
-MAINOBJ  := if.o interface.o etherStream.o etherStreambuf.o tcStream.o tcStreambuf.o
+MAINOBJ  := if.o interface.o etherStream.o etherStreambuf.o tcStream.o tcStreambuf.o tcRtsDump.o tcRtsDumpbuf.o
 EXAMPLE  := example
-EXOBJ    := if.o interface.o etherStream.o etherStreambuf.o tcStream.o tcStreambuf.o
+EXOBJ    := if.o interface.o etherStream.o etherStreambuf.o tcStream.o tcStreambuf.o tcRtsDump.o tcRtsDumpbuf.o
 
 CXX        := g++
 CXXFLAGS   := -march=i386 -O2
@@ -122,6 +122,10 @@ edit: objclean
 	etherStream.cpp \
 	etherStreambuf.h \
 	etherStreambuf.cpp \
+	tcRtsDump.h \
+	tcRtsDump.cpp \
+	tcRtsDumpbuf.h \
+	tcRtsDumpbuf.cpp \
 	tcStream.h \
 	tcStream.cpp \
 	tcStreambuf.h \
@@ -130,3 +134,4 @@ edit: objclean
 
 backup: distclean
 	cvs ci -m "automatic commitment"
+

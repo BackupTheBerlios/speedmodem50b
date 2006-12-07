@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tcStreambuf.cpp,v 1.5 2006/12/06 17:48:25 miunske Exp $
+// $Id: tcStreambuf.cpp,v 1.6 2006/12/07 03:24:53 miunske Exp $
 
 #include "tcStreambuf.h"
 
@@ -44,7 +44,8 @@ namespace tc {
 
    void tcStreambuf::initValues() {
       etherStreambuf::initValues();
-      macRtsDumpIsRunning=consoleSessionIsOpen=false;
+      macRtsDump=NULL;
+      consoleSessionIsOpen=false;
       setTxMode(packetwise);
       setRxMode(stream);
       setRxTimeoutuSec(10000);
@@ -64,7 +65,7 @@ namespace tc {
    }
 
    void tcStreambuf::closeInterface()  {
-      if(isConsoleSessionOpen()) closeSession();
+      if(isConsoleSessionOpen()||isMacRtsDumpRunning()) closeSession(macRtsDump);
       etherStreambuf::closeInterface();
    }
 
@@ -271,7 +272,7 @@ namespace tc {
       } else return false;
    }
 
-   bool tcStreambuf::startMacRtsDump() {
+   tcRtsDump* tcStreambuf::startMacRtsDump() {
       bool result = false;
       int retriesLeft = maxRetries;
 
@@ -285,17 +286,18 @@ namespace tc {
                fetchPackets(timeout, 0);
             }
 
-            if(result); // doSomething e.g. setTxDestMac(peer.mac);
-         }
+            if(result) {
+               macRtsDump=new tcRtsDump(iface, peer.mac);
+            }
+         } else result=false;
       } else
          result=true;
 
-      macRtsDumpIsRunning=result;
-      return result;
+      if(result) return macRtsDump; else return NULL;
    }
 
    bool tcStreambuf::isMacRtsDumpRunning() {
-      return macRtsDumpIsRunning;
+      return macRtsDump!=NULL;
    }
 
    void tcStreambuf::sendCloseSessionPacket(const std::string& mac) {
@@ -312,7 +314,9 @@ namespace tc {
       } else return false;
    }
 
-   bool tcStreambuf::closeSession() {
+   bool tcStreambuf::closeSession(tcRtsDump* openRtsDump) {
+      if(openRtsDump!=NULL && openRtsDump==macRtsDump) delete openRtsDump;
+
       if(!isInterfaceOpen()) return true;
       if(!isConsoleSessionOpen() &&
          !isMacRtsDumpRunning()) return true;
@@ -330,7 +334,8 @@ namespace tc {
          fetchPackets(timeout, 0);
       }
 
-      macRtsDumpIsRunning=consoleSessionIsOpen=false;
+      consoleSessionIsOpen=false;
+      if(openRtsDump!=NULL && openRtsDump==macRtsDump) macRtsDump=NULL;
       return result;
    }
 

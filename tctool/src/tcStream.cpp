@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tcStream.cpp,v 1.3 2006/12/06 17:48:25 miunske Exp $
+// $Id: tcStream.cpp,v 1.4 2006/12/07 03:24:53 miunske Exp $
 
 #include "tcStream.h"
 
@@ -79,7 +79,7 @@ namespace tc {
       return static_cast<tcStreambuf*>(rdbuf())->isConsoleSessionOpen();
    }
 
-   bool tcStream::startMacRtsDump() {
+   tcRtsDump* tcStream::startMacRtsDump() {
       return static_cast<tcStreambuf*>(rdbuf())->startMacRtsDump();
    }
 
@@ -87,9 +87,8 @@ namespace tc {
       return static_cast<tcStreambuf*>(rdbuf())->isMacRtsDumpRunning();
    }
 
-
-   bool tcStream::closeSession() {
-      return static_cast<tcStreambuf*>(rdbuf())->closeSession();
+   bool tcStream::closeSession(tcRtsDump* openRtsDump) {
+      return static_cast<tcStreambuf*>(rdbuf())->closeSession(openRtsDump);
    }
 
    bool tcStream::login(const std::string& password) {

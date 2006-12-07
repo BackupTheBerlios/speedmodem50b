@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: etherStreambuf.cpp,v 1.3 2006/12/06 17:48:25 miunske Exp $
+// $Id: etherStreambuf.cpp,v 1.4 2006/12/07 03:24:53 miunske Exp $
 
 #include "etherStreambuf.h"
 
@@ -199,10 +199,11 @@ namespace tc {
 
    void etherStreambuf::setMaxDataLen(int mdl) {
       mdl=(mdl+dhl+ethHeaderLen<=sizeof(sendPkt))?mdl:sizeof(sendPkt)-dhl+ethHeaderLen;
-      setMTU(mdl+dhl+ethHeaderLen);
+      setMTU(mdl+dhl);
    }
 
    void etherStreambuf::setMTU(int mtu) {
+      mtu+=+ethHeaderLen;
       if(mtu>dhl+ethHeaderLen)  setTxBuffer(dhl, mtu);
       else if(mtu>ethHeaderLen) setTxBuffer(0, mtu);
       else setTxBuffer(0, sizeof(sendPkt));
@@ -378,7 +379,7 @@ namespace tc {
       setTxBuffer(0, sizeof(sendPkt));
       setTxDestMac(getBroadcastMac());
       setTxFrameType(0x0000);
-      setMTU(sizeof(sendPkt));
+      setMTU(sizeof(sendPkt.frame.data));
    }
 
    std::streamsize etherStreambuf::xsputn(const char_type *s,

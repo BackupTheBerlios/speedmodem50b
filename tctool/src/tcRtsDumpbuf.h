@@ -23,26 +23,49 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tcStream.h,v 1.4 2006/12/07 03:24:53 miunske Exp $
+// $Id: tcRtsDumpbuf.h,v 1.1 2006/12/07 03:25:28 miunske Exp $
 
-#ifndef _TCSTREAM_h_included_
-#define _TCSTREAM_h_included_
+#ifndef _TCRTSDUMPBUF_h_included_
+#define _TCRTSDUMPBUF_h_included_
 
-#include "etherStream.h"
-#include "tcStreambuf.h"
+#include "etherStreambuf.h"
+#include "interface.h"
 #include <string.h>
+#include <vector>
 
 namespace tc {
-   /** 
-    * @class tcStream
+   typedef union {
+      char raw[_ETH_DATA_LEN_+14];
+      struct {
+         char        dmac[6];
+         char        smac[6];
+         UINT16_t    type;
+         char        frameNo;
+         char        hSize;      // due to word-alignment :-/
+         char        lSize;
+         char        data[_ETH_DATA_LEN_-3];
+         UINT16_t    size;
+      } frame;
+   } tcRtsPacket;
+
+   typedef union {
+      char     bRaw[36];
+      UINT16_t wRaw[18];
+      struct {
+         char        dummy;
+      } frame;
+   } tcRtsFrame;
+
+   /**
+    * @class tcRtsDumpbuf
     *
-    * @brief This is an iostream using tcStreambuf to provide console-io to Tr*ndCh*p-devices via any ethernet-interface.
+    * @brief This is a streambuf to provide direct io via any ethernet-interface.
     *
     * This class provides a comfortable interface for ethernet-based console-io
     * with Tr*ndCh*p-devices using any ethernet-device.
-    * It is mainly a wrapper-class using tcStreambuf which is derived from etherStreambuf.
+    * It should always be used by it's wrapper-class tcStream.
     *
-    * @see tcStreambuf
+    * @see tcStream
     * @see etherStream
     * @see etherStreambuf
     *
@@ -50,30 +73,38 @@ namespace tc {
     *
     * $Header $
     */
-   class tcStream : public etherStream {
+   class tcRtsDumpbuf : public etherStreambuf {
       public:
-         tcStream();
+         static const unsigned long int tcFrameType  = 0xaa7f;
+
+      protected:
+         std::string peerMac;
+         std::string rtsData;
+
+      public:
+         tcRtsDumpbuf(const std::string& iface, const std::string& peer);
+         bool doSomething();
+
+      protected:
+         virtual void initValues();
          bool openInterface(const std::string& iface);
-         void setMaxRetries(int retries);
-         const std::vector<tcStreambuf::discoveryResult>& macDiscover();
-         const std::vector<tcStreambuf::discoveryResult>& udpDiscover(const std::string& ip = std::string());
-         const std::vector<tcStreambuf::discoveryResult>& discover();
-         const tcStreambuf::discoveryResult& setPeer(const tcStreambuf::discoveryResult& newPeer);
-         const tcStreambuf::discoveryResult& setPeerByMac(const std::string& peerMac);
-         const tcStreambuf::discoveryResult& setPeerByIp(const std::string& peerIp);
-         void setPeerPassword(const std::string& password);
-         bool openConsoleSession();
-         bool isConsoleSessionOpen();
-         tcRtsDump* startMacRtsDump();
-         bool isMacRtsDumpRunning();
-         bool closeSession(tcRtsDump* openRtsDump = NULL);
-         bool login(const std::string& password = std::string());
-         bool isLoggedIn();
-         bool logout();
-         bool executeCommand(const std::string& command, std::string& result, const std::string& password = std::string());
-         std::vector<tcStreambuf::tcStatus> readStatus(const std::string& ip = std::string());
-         bool updatePeerStatus();
-         const tcStreambuf::tcStatus& getPeerStatus();
+         virtual void closeInterface();
+         bool getNextRtsFrame(tcRtsFrame& frame);
+         void collectPackets();
+         virtual bool sendRawPacket(etherPacket& pkt, int pktLength);
+         virtual bool receiveRawPacket(etherPacket& pkt, int& pktLength);
+         bool getNextPacketIt(std::vector<etherPacket>::iterator& pktIt,
+                              std::vector<int>::iterator& sizeIt);
+         bool getFirstPacketIt(std::vector<etherPacket>::iterator& pktIt,
+                              std::vector<int>::iterator& sizeIt);
+         bool getNextPacket(etherPacket& pkt, int& pktLength);
+         int  peekNextPacketSize();
+         bool getNextRtsPacket(tcRtsPacket& pkt, int& pktLength);
+         virtual bool getNextDataPacket(etherPacket& pkt, int& pktLength);
+         virtual int  peekNextDataPacketSize();
+         virtual std::streamsize showmanyc();
+         void byteFix(tcRtsPacket& pkt);
+         void byteFix(tcRtsFrame& frame);
    };
 };
 

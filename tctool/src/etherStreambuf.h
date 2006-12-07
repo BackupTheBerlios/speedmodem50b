@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: etherStreambuf.h,v 1.3 2006/12/06 17:48:25 miunske Exp $
+// $Id: etherStreambuf.h,v 1.4 2006/12/07 03:24:53 miunske Exp $
 
 #ifndef _ETHERSTREAMBUF_h_included_
 #define _ETHERSTREAMBUF_h_included_
@@ -33,7 +33,7 @@
 #include <vector>
 #include <string.h>
 
-#define _ETH_DATA_LEN_ 1486
+#define _ETH_DATA_LEN_ 1500
 
 namespace tc {
    typedef union {

@@ -23,11 +23,12 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tcStreambuf.h,v 1.5 2006/12/06 17:48:25 miunske Exp $
+// $Id: tcStreambuf.h,v 1.6 2006/12/07 03:24:53 miunske Exp $
 
 #ifndef _TCSTREAMBUF_h_included_
 #define _TCSTREAMBUF_h_included_
 
+#include "tcRtsDump.h"
 #include "etherStreambuf.h"
 #include "interface.h"
 #include <string.h>
@@ -266,7 +267,7 @@ namespace tc {
          int maxRetries;
          discoveryResult peer;
          bool consoleSessionIsOpen;
-         bool macRtsDumpIsRunning;
+         tcRtsDump* macRtsDump;
          tcStatus peerStatus;
 
       public:
@@ -284,9 +285,9 @@ namespace tc {
          void setPeerPassword(const std::string& password);
          bool openConsoleSession();
          bool isConsoleSessionOpen();
-         bool startMacRtsDump();
+         tcRtsDump* startMacRtsDump();
          bool isMacRtsDumpRunning();
-         bool closeSession();
+         bool closeSession(tcRtsDump* openRtsDump = NULL);
          bool login(const std::string& password = std::string());
          bool isLoggedIn();
          bool logout();

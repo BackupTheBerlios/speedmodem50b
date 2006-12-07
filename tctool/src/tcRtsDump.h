@@ -23,18 +23,17 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tcStream.h,v 1.4 2006/12/07 03:24:53 miunske Exp $
+// $Id: tcRtsDump.h,v 1.1 2006/12/07 03:25:28 miunske Exp $
 
-#ifndef _TCSTREAM_h_included_
-#define _TCSTREAM_h_included_
+#ifndef _TCRTSDUMP_h_included_
+#define _TCRTSDUMP_h_included_
 
-#include "etherStream.h"
-#include "tcStreambuf.h"
+#include "tcRtsDumpbuf.h"
 #include <string.h>
 
 namespace tc {
    /** 
-    * @class tcStream
+    * @class tcRtsDump
     *
     * @brief This is an iostream using tcStreambuf to provide console-io to Tr*ndCh*p-devices via any ethernet-interface.
     *
@@ -50,30 +49,17 @@ namespace tc {
     *
     * $Header $
     */
-   class tcStream : public etherStream {
+   class tcRtsDump {
+      private:
+         tcRtsDumpbuf* buf;
+
       public:
-         tcStream();
-         bool openInterface(const std::string& iface);
-         void setMaxRetries(int retries);
-         const std::vector<tcStreambuf::discoveryResult>& macDiscover();
-         const std::vector<tcStreambuf::discoveryResult>& udpDiscover(const std::string& ip = std::string());
-         const std::vector<tcStreambuf::discoveryResult>& discover();
-         const tcStreambuf::discoveryResult& setPeer(const tcStreambuf::discoveryResult& newPeer);
-         const tcStreambuf::discoveryResult& setPeerByMac(const std::string& peerMac);
-         const tcStreambuf::discoveryResult& setPeerByIp(const std::string& peerIp);
-         void setPeerPassword(const std::string& password);
-         bool openConsoleSession();
-         bool isConsoleSessionOpen();
-         tcRtsDump* startMacRtsDump();
-         bool isMacRtsDumpRunning();
-         bool closeSession(tcRtsDump* openRtsDump = NULL);
-         bool login(const std::string& password = std::string());
-         bool isLoggedIn();
-         bool logout();
-         bool executeCommand(const std::string& command, std::string& result, const std::string& password = std::string());
-         std::vector<tcStreambuf::tcStatus> readStatus(const std::string& ip = std::string());
-         bool updatePeerStatus();
-         const tcStreambuf::tcStatus& getPeerStatus();
+         tcRtsDump(const std::string& iface, const std::string& peer);
+         bool doSomething();
+
+      private:
+         tcRtsDumpbuf* rdbuf();
+         tcRtsDumpbuf* rdbuf(tcRtsDumpbuf* newbuf);
    };
 };
 

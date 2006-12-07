@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tctool.cpp,v 1.5 2006/12/06 17:48:25 miunske Exp $
+// $Id: tctool.cpp,v 1.6 2006/12/07 03:24:53 miunske Exp $
 
 #define BUFFERSIZE 8192
 
@@ -453,12 +453,14 @@ int startMacRtsDump() {
    if((openDevResult=setTcDev())>0) return openDevResult;
 
    int result = 0;
-   if(tcDev.startMacRtsDump()) {
-      sleep(5);
+   tc::tcRtsDump* tcDump = tcDev.startMacRtsDump();
+   if(tcDump!=NULL) {
+      sleep(1);
+      for(int i=0; i<50 && tcDump->doSomething(); ++i) sleep(1);
    } else
       result=15;
 
-   tcDev.closeSession();
+   tcDev.closeSession(tcDump);
    return result;
 }
 
