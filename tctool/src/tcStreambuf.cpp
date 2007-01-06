@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tcStreambuf.cpp,v 1.6 2006/12/07 03:24:53 miunske Exp $
+// $Id: tcStreambuf.cpp,v 1.7 2007/01/06 02:30:47 miunske Exp $
 
 #include "tcStreambuf.h"
 
@@ -691,7 +691,7 @@ namespace tc {
       sprintf(status.hostname, "%s", trim(std::string(status.hostname)).c_str());
       sprintf(status.ipaddr, "%s", trim(std::string(status.ipaddr)).c_str());
       sprintf(status.netmask, "%s", trim(std::string(status.netmask)).c_str());
-      status.vcQOS=ntohs(status.vcQOS);
+      status.vcEncap=ntohs(status.vcEncap);
       status.vcVPI=ntohs(status.vcVPI);
       status.vcVCI=ntohs(status.vcVCI);
       status.toneCount=ntohs(status.toneCount);
@@ -1036,8 +1036,8 @@ namespace tc {
       return std::string(status.netmask);
    }
 
-   int tcStreambuf::tcStatus::getVcQOS() const {
-      return int(0xffff & status.vcQOS);
+   int tcStreambuf::tcStatus::getVcEncap() const {
+      return int(0xffff & status.vcEncap);
    }
 
    int tcStreambuf::tcStatus::getVcVPI() const {

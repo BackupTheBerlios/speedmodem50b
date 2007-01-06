@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tcStreambuf.h,v 1.6 2006/12/07 03:24:53 miunske Exp $
+// $Id: tcStreambuf.h,v 1.7 2007/01/06 02:30:47 miunske Exp $
 
 #ifndef _TCSTREAMBUF_h_included_
 #define _TCSTREAMBUF_h_included_
@@ -83,7 +83,7 @@ namespace tc {
       char     hostname[32];
       char     ipaddr[32];
       char     netmask[32];
-      UINT16_t vcQOS;
+      UINT16_t vcEncap;
       UINT16_t vcVPI;
       UINT16_t vcVCI;
       UINT16_t toneCount;     // highly guessed
@@ -182,6 +182,8 @@ namespace tc {
                static const unsigned int lineStatusWaiting      = 0x0800;
                static const unsigned int lineStatusInitializing = 0x1000;
                static const unsigned int lineStatusUp           = 0x2006;
+               static const unsigned int vcEncapLLCSNAP         = 0x0001;
+               static const unsigned int vcEncapVcMux           = 0x0002;
                static const double       protocolOverhead       = 0.1439;
 
             protected:
@@ -253,7 +255,7 @@ namespace tc {
                std::string getHostname() const;
                std::string getIpaddr() const;
                std::string getNetmask() const;
-               int         getVcQOS() const;
+               int         getVcEncap() const;
                int         getVcVPI() const;
                int         getVcVCI() const;
                int         getToneCount() const;

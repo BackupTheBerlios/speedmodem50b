@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tctool.cpp,v 1.7 2006/12/07 14:53:47 miunske Exp $
+// $Id: tctool.cpp,v 1.8 2007/01/06 02:30:47 miunske Exp $
 
 #define BUFFERSIZE 8192
 
@@ -272,7 +272,20 @@ void printStatusHumanReadable(const tc::tcStreambuf::tcStatus& status, int idx, 
    }
    printf("\n");
    printf("LINE Uptime : %s\n", status.getLineUptime().c_str());
-   printf("ATM vc      : vpi=%u vci=%u qos=%u\n", status.getVcVPI(), status.getVcVCI(), status.getVcQOS());
+   printf("ATM vc      : %u/%u ", status.getVcVPI(), status.getVcVCI());
+   switch(status.getVcEncap()) {
+      case tc::tcStreambuf::tcStatus::vcEncapLLCSNAP:
+         printf("LLC/SNAP");
+         break;
+      case tc::tcStreambuf::tcStatus::vcEncapVcMux:
+         printf("VcMux");
+         break;
+      default:
+         printf("unknown");
+         break;
+   }
+   printf("\n");
+
    printf("                                down         up\n");
    if(!(status.isFastpath()||status.isInterleaved()))
       printf("Bit-rate                  :  %10u  %10u\n", 0, 0);
@@ -382,7 +395,19 @@ void printStatusScriptable(const tc::tcStreambuf::tcStatus& status, int idx) {
       printf("tcHOSTNAME='%s'\n", status.getHostname().c_str());
       printf("tcLAN_IP='%s'\n", status.getIpaddr().c_str());
       printf("tcLAN_NETMASK='%s'\n", status.getNetmask().c_str());
-      printf("tcVC_QOS='%u'\n", status.getVcQOS());
+      printf("tcVC_ENCAP='");
+      switch(status.getVcEncap()) {
+         case tc::tcStreambuf::tcStatus::vcEncapLLCSNAP:
+            printf("LLCSNAP");
+            break;
+         case tc::tcStreambuf::tcStatus::vcEncapVcMux:
+            printf("VCMUX");
+            break;
+         default:
+            printf("unknown");
+            break;
+      }
+      printf("'\n");
       printf("tcVC_VPI='%u'\n", status.getVcVPI());
       printf("tcVC_VCI='%u'\n", status.getVcVCI());
       printf("tcLINE_TONECOUNT='%u'\n", status.getToneCount());

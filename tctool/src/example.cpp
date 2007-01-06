@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: example.cpp,v 1.2 2006/12/06 17:48:25 miunske Exp $
+// $Id: example.cpp,v 1.3 2007/01/06 02:30:47 miunske Exp $
 
 #include "tcStream.h"
 
@@ -166,7 +166,7 @@ int main(int argc, char** argv) {
          printf("Hostname                     : %s\n", tcModem->getPeerStatus().getHostname().c_str());
          printf("Ipaddr                       : %s\n", tcModem->getPeerStatus().getIpaddr().c_str());
          printf("Netmask                      : %s\n", tcModem->getPeerStatus().getNetmask().c_str());
-         printf("VcQOS                        : %4u\n", tcModem->getPeerStatus().getVcQOS());
+         printf("VcEncapsulation              : %4u\n", tcModem->getPeerStatus().getVcEncap());
          printf("VcVPI                        : %4u\n", tcModem->getPeerStatus().getVcVPI());
          printf("VcVCI                        : %4u\n", tcModem->getPeerStatus().getVcVCI());
          printf("ToneCount                    : %4u\n", tcModem->getPeerStatus().getToneCount());
