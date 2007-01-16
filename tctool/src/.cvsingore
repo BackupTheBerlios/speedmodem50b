@@ -1,4 +1,5 @@
 tctool
 tctool.static
+tctool.mipsel
 lib*.a
 *.o

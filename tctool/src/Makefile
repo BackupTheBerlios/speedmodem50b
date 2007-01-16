@@ -23,7 +23,7 @@
 #   LIC: GPL                                                              *
 #                                                                         *
 #**************************************************************************
-# $Id: Makefile,v 1.6 2006/12/07 03:24:53 miunske Exp $
+# $Id: Makefile,v 1.7 2007/01/16 16:15:54 miunske Exp $
 
 DESTDIR  := /usr/local/bin/
 MAIN     := tctool
@@ -31,8 +31,13 @@ MAINOBJ  := if.o interface.o etherStream.o etherStreambuf.o tcStream.o tcStreamb
 EXAMPLE  := example
 EXOBJ    := if.o interface.o etherStream.o etherStreambuf.o tcStream.o tcStreambuf.o tcRtsDump.o tcRtsDumpbuf.o
 
-CXX        := g++
-CXXFLAGS   := -march=i386 -O2
+#CROSS_COMPILE := mipsel-linux-uclibc-
+CROSS_ARCH    := $(shell test -z "$(CROSS_COMPILE)" && echo -march=i386)
+CC            := $(CROSS_COMPILE)gcc
+LD            := $(CROSS_COMPILE)gcc
+CXX           := $(CROSS_COMPILE)g++
+
+CXXFLAGS   := -O2
 LDFLAGS    := --strip-unneeded
 LIBS       := 
 LDSTATIC   := -L. -static-libgcc
@@ -46,6 +51,12 @@ default: install
 
 test: $(EXAMPLE)
 	./$(EXAMPLE)
+
+MIPS_PREFIX := mipsel-linux-uclibc-
+
+$(MAIN).mipsel: clean
+	export CROSS_COMPILE=$(MIPS_PREFIX); make $(MAIN)
+	$(MIPS_PREFIX)-strip -o $(MAIN).mipsel $(MAIN)
 
 all: $(MAIN) $(EXAMPLE) objclean docs
 
@@ -75,13 +86,13 @@ $(EXAMPLE): $(EXAMPLE).o $(EXOBJ)
 	$(CXX) $(LDFLAGS) -o $@ $(LIBS) $^
 
 %.o: %.cpp %.h
-	$(CXX) -c $(CXXFLAGS) $< -o $@
+	$(CXX) -c $(CROSS_ARCH) $(CXXFLAGS) $< -o $@
 
 %.o: %.cpp
-	$(CXX) -c $(CXXFLAGS) $< -o $@
+	$(CXX) -c $(CROSS_ARCH) $(CXXFLAGS) $< -o $@
 
 %.o: %.c
-	$(CXX) -c $(CXXFLAGS) $< -o $@
+	$(CXX) -c $(CROSS_ARCH) $(CXXFLAGS) $< -o $@
 
 config.h: configure
 	touch install-sh
@@ -101,7 +112,7 @@ realclean: clean
 	rm -rfv configure
 
 clean: docsclean objclean
-	rm -rfv $(MAIN) $(MAIN).static $(EXAMPLE) autom4te.cache config.status config.log install-sh
+	rm -rfv $(MAIN) $(MAIN).static $(MAIN).mipsel $(EXAMPLE) autom4te.cache config.status config.log install-sh
 
 objclean: libsclean
 	rm -fv *~ *.o
