@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tctool.cpp,v 1.8 2007/01/06 02:30:47 miunske Exp $
+// $Id: tctool.cpp,v 1.9 2007/01/20 00:36:59 miunske Exp $
 
 #define BUFFERSIZE 8192
 
@@ -80,9 +80,6 @@ int errorMsg(char *binary, int error) {
          break;
       case -SIGTERM:
          fprintf(stderr, "caught SIGTERM. terminating cleanly.\n");
-         break;
-      case -SIGTSTP:
-         fprintf(stderr, "caught SIGTSTP. terminating cleanly.\n");
          break;
       case -SIGUSR1:
          fprintf(stderr, "caught SIGUSR1. terminating cleanly.\n");
@@ -168,7 +165,6 @@ void installSignalHandler(char* argv0) {
    sigaction(SIGQUIT, &action, NULL);
    sigaction(SIGABRT, &action, NULL);
    sigaction(SIGTERM, &action, NULL);
-   sigaction(SIGTSTP, &action, NULL);
    sigaction(SIGUSR1, &action, NULL);
    sigaction(SIGUSR2, &action, NULL);
 }
