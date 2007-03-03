@@ -23,7 +23,7 @@
  *   LIC: GPL                                                              *
  *                                                                         *
  ***************************************************************************/
-// $Id: tcStreambuf.cpp,v 1.7 2007/01/06 02:30:47 miunske Exp $
+// $Id: tcStreambuf.cpp,v 1.8 2007/03/03 15:11:08 miunske Exp $
 
 #include "tcStreambuf.h"
 
@@ -997,7 +997,7 @@ namespace tc {
    int tcStreambuf::tcStatus::getBitloadingValue(int tone) const {
       if(tone<0) return 0;
       if(tone>=getToneCount()) return 0;
-      return (tone%2)?status.bitloadingValues[tone/2]/16:status.bitloadingValues[tone/2]%16;
+      return (tone%2)?(status.bitloadingValues[tone/2]/16)&15:(status.bitloadingValues[tone/2]%16)&15;
    }
 
    int tcStreambuf::tcStatus::getUnknown0x27c() const {
